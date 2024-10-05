@@ -1,4 +1,3 @@
--- Event handling for "Do I Know You" addon
 
 -- Slash command handler for showing known players
 function Reckoning:ShowKnownPlayers()
@@ -8,31 +7,97 @@ function Reckoning:ShowKnownPlayers()
         self:Print("No players found in the database.")
     else
         for name, info in pairs(self.db.factionrealm.players) do
-            local score = info.score
-            if score ~= nil then
-                self:Print(name .. " - Last seen on " .. info.lastSeen .. " - Shared " .. info.count .. " instances - Score: " .. score)
+            if info.note ~= nil and info.note ~= "" then
+                self:Print(name .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score .. " - Note: " .. info.note)
             else
-                self:Print(name .. " - Last seen on " .. info.lastSeen .. " - Shared " .. info.count .. " instances - No score")
+                self:Print(name .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score)
             end
         end
     end
 end
 
+-- Handle when the group is left
+function Reckoning:OnGroupLeft()
+    -- Store the players in the previous group
+    previousGroupMembers = partyMembers
 
-function Reckoning_OnEvent(self, event, arg1, ...)
-    if event == "ADDON_LOADED" and arg1 == "Reckoning" then
-        if not ReckoningDB then
-            ReckoningDB = {}
-        end
-    elseif event == "GROUP_ROSTER_UPDATE"
-        or event == "PARTY_LEADER_CHANGED"
-        or event == "PLAYER_ENTERING_WORLD"
-        or event == "GROUP_JOINED"
-        or event == "GROUP_FORMED" then
-        UpdatePartyMembers()
-    elseif event == "GROUP_LEFT" then
-        previousGroupMembers = partyMembers
-        partyMembers = {}
-        self:ShowPreviousGroupPopup()
+    -- Clear the current party members table
+    partyMembers = {}
+
+    -- Show the popup with the players
+    self:ShowPreviousGroupPopup()
+end
+
+-- Function to populate fake data for testing
+function Reckoning:PopulateFakeData()
+    -- Add some fake player names to previousGroupMembers
+    previousGroupMembers = {
+        ["Thrall-AzjolNerub"] = true,
+        ["Jaina-Proudmoore"] = true,
+        ["Sylvanas-Windrunner"] = true,
+        ["Anduin-Wrynn"] = true,
+        ["Illidan-Stormrage"] = true
+    }
+
+    -- Add some initial fake scores to the factionrealm-specific database
+    if not self.db.factionrealm.players["Thrall-AzjolNerub"] then
+        self.db.factionrealm.players["Thrall-AzjolNerub"] = {
+            score = -1,
+            lastSeen = "2024-10-05 12:00",
+            count = 1,
+            lastInstanceID = 1,
+            note = "\“Dad who left for cigarettes\” and only comes back to give an awkward pep talk before disappearing again"
+        }
+    end
+
+    if not self.db.factionrealm.players["Jaina-Proudmoore"] then
+        self.db.factionrealm.players["Jaina-Proudmoore"] = {
+            score = 2,
+            lastSeen = "2024-10-05 12:00",
+            count = 1, lastInstanceID = 1,
+            note = "The living embodiment of \"daddy issues\" in human form"
+        }
+    end
+
+    if not self.db.factionrealm.players["Sylvanas-Windrunner"] then
+        self.db.factionrealm.players["Sylvanas-Windrunner"] = {
+            score = 0,
+            lastSeen = "2024-10-05 12:00",
+            count = 1,
+            lastInstanceID = 1,
+            note = "The edgiest, most melodramatic \"tragic villain\" Azeroth has ever seen"
+        }
+    end
+
+    if not self.db.factionrealm.players["Anduin-Wrynn"] then
+        self.db.factionrealm.players["Anduin-Wrynn"] = {
+            score = 1,
+            lastSeen = "2024-10-05 12:00",
+            count = 1,
+            lastInstanceID = 1,
+            note = "The king with the softest hands in Azeroth"
+        }
+    end
+
+    if not self.db.factionrealm.players["Illidan-Stormrage"] then
+        self.db.factionrealm.players["Illidan-Stormrage"] = {
+            score = 0,
+            lastSeen = "2024-10-05 12:00",
+            count = 1,
+            lastInstanceID = 1,
+            note = "A guy who can’t take no for an answer, obsessed with power, and constantly trying to convince everyone (and himself) that he’s not the bad guy"
+        }
+    end
+
+    self:Print("Fake test data loaded. Opening score popup...")
+end
+
+
+function Reckoning:ToggleMinimapIcon()
+    self.db.profile.minimap.hide = not self.db.profile.minimap.hide
+    if self.db.profile.minimap.hide then
+        icon:Hide("Reckoning")
+    else
+        icon:Show("Reckoning")
     end
 end

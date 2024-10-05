@@ -1,5 +1,3 @@
--- Core logic for player tracking
-
 -- Declare global tables for party and previous group members
 partyMembers = {}
 previousGroupMembers = {}
@@ -10,7 +8,7 @@ function GetFullPlayerName(name, realm)
         name = UnitName("player")
     end
     if not realm or realm == "" then
-        realm = GetRealmName()
+        return name
     end
     return name .. "-" .. realm
 end
@@ -56,20 +54,24 @@ function Reckoning:UpdatePartyMembers()
                         if self.db.factionrealm.players[fullName].lastInstanceID ~= instanceID then
                             self.db.factionrealm.players[fullName].lastInstanceID = instanceID
                             self.db.factionrealm.players[fullName].count = self.db.factionrealm.players[fullName].count + 1
-                        end
-                        -- Display player's score when they join
-                        local score = self.db.factionrealm.players[fullName].score
-                        if score ~= nil then
-                            self:Print(fullName .. " has a score of " .. score)
-                        else
-                            self:Print(fullName .. " has no score yet.")
+
+                            -- Display player's score when they join
+                            local score = self.db.factionrealm.players[fullName].score
+                            local note = self.db.factionrealm.players[fullName].note
+                            if score ~= 0 or (note ~= nil and note ~= "") then
+                                self:Print(fullName .. " has a score of " .. score)
+                                if note ~= nil and note ~= "" then
+                                    self:Print("Note: " .. note);
+                                end
+                            end
                         end
                     else
                         self.db.factionrealm.players[fullName] = {
                             lastSeen = timestamp,
                             count = 1,
                             lastInstanceID = instanceID,
-                            score = nil,  -- Initialize score as nil
+                            score = 0,
+                            note = nil
                         }
                         self:Print("Added new player to ReckoningDB: " .. fullName)
                     end
@@ -95,20 +97,24 @@ function Reckoning:UpdatePartyMembers()
                         if self.db.factionrealm.players[fullName].lastInstanceID ~= instanceID then
                             self.db.factionrealm.players[fullName].lastInstanceID = instanceID
                             self.db.factionrealm.players[fullName].count = self.db.factionrealm.players[fullName].count + 1
-                        end
-                        -- Display player's score when they join
-                        local score = self.db.factionrealm.players[fullName].score
-                        if score ~= nil then
-                            self:Print(fullName .. " has a score of " .. score)
-                        else
-                            self:Print(fullName .. " has no score yet.")
+
+                            -- Display player's score when they join
+                            local score = self.db.factionrealm.players[fullName].score
+                            local note = self.db.factionrealm.players[fullName].note
+                            if score ~= 0 or (note ~= nil and note ~= "") then
+                                self:Print(fullName .. " has a score of " .. score)
+                                if note ~= nil and note ~= "" then
+                                    self:Print("Note: " .. note);
+                                end
+                            end
                         end
                     else
                         self.db.factionrealm.players[fullName] = {
                             lastSeen = timestamp,
                             count = 1,
                             lastInstanceID = instanceID,
-                            score = nil,  -- Initialize score as nil
+                            score = 0,
+                            note = nil
                         }
                         self:Print("Added new player to ReckoningDB: " .. fullName)
                     end
@@ -119,16 +125,3 @@ function Reckoning:UpdatePartyMembers()
         self:Print("You are not in a party or raid.")
     end
 end
-
--- Handle when the group is left
-function Reckoning:OnGroupLeft()
-    -- Store the players in the previous group
-    previousGroupMembers = partyMembers
-
-    -- Clear the current party members table
-    partyMembers = {}
-
-    -- Show the popup with the players
-    self:ShowPreviousGroupPopup()
-end
-

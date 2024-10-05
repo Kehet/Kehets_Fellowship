@@ -83,6 +83,21 @@ function Reckoning:ShowPreviousGroupPopup()
             group:AddChild(button)
         end
 
+        -- Add player description label
+        local descriptionLabel = AceGUI:Create("Label")
+        descriptionLabel:SetText("Note:")
+        descriptionLabel:SetWidth(80)
+        group:AddChild(descriptionLabel)
+
+        -- Create an edit box for the player description
+        local editBox = AceGUI:Create("EditBox")
+        editBox:SetWidth(300)
+        editBox:SetText(self.db.factionrealm.players[playerName] and self.db.factionrealm.players[playerName].note or "")
+        editBox:SetCallback("OnTextChanged", function(widget, event, text)
+            self.db.factionrealm.players[playerName].note = text
+        end)
+        group:AddChild(editBox)
+
         scroll:AddChild(group)
     end
 
