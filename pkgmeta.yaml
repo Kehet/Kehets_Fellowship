@@ -1,0 +1,12 @@
+manual-changelog: CHANGELOG.md
+license-output: LICENSE
+ignore:
+    - README.md
+    - pkgmeta.yaml
+enable-nolib-creation: no
+externals:
+    libs/AceAddon-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceAddon-3.0
+    libs/AceConsole-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceConsole-3.0
+    libs/AceDB-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceDB-3.0
+    libs/AceGUI-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceGUI-3.0
+    libs/AceEvent-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceEvent-3.0
