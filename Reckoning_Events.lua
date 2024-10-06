@@ -8,9 +8,9 @@ function Reckoning:ShowKnownPlayers()
     else
         for name, info in pairs(self.db.factionrealm.players) do
             if info.note ~= nil and info.note ~= "" then
-                self:Print(name .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score .. " - Note: " .. info.note)
+                self:Print(name .. " - " .. info.class .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score .. " - Note: " .. info.note)
             else
-                self:Print(name .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score)
+                self:Print(name .. " - " .. info.class .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score)
             end
         end
     end
@@ -46,7 +46,8 @@ function Reckoning:PopulateFakeData()
             lastSeen = "2024-10-05 12:00",
             count = 1,
             lastInstanceID = 1,
-            note = "\“Dad who left for cigarettes\” and only comes back to give an awkward pep talk before disappearing again"
+            note = "\“Dad who left for cigarettes\” and only comes back to give an awkward pep talk before disappearing again",
+            class = "SHAMAN"
         }
     end
 
@@ -55,7 +56,8 @@ function Reckoning:PopulateFakeData()
             score = 2,
             lastSeen = "2024-10-05 12:00",
             count = 1, lastInstanceID = 1,
-            note = "The living embodiment of \"daddy issues\" in human form"
+            note = "The living embodiment of \"daddy issues\" in human form",
+            class = "MAGE"
         }
     end
 
@@ -65,7 +67,8 @@ function Reckoning:PopulateFakeData()
             lastSeen = "2024-10-05 12:00",
             count = 1,
             lastInstanceID = 1,
-            note = "The edgiest, most melodramatic \"tragic villain\" Azeroth has ever seen"
+            note = "The edgiest, most melodramatic \"tragic villain\" Azeroth has ever seen",
+            class = "HUNTER"
         }
     end
 
@@ -75,17 +78,19 @@ function Reckoning:PopulateFakeData()
             lastSeen = "2024-10-05 12:00",
             count = 1,
             lastInstanceID = 1,
-            note = "The king with the softest hands in Azeroth"
+            note = "The king with the softest hands in Azeroth",
+            class = "PRIEST"
         }
     end
 
     if not self.db.factionrealm.players["Illidan-Stormrage"] then
         self.db.factionrealm.players["Illidan-Stormrage"] = {
-            score = 0,
+            score = -2,
             lastSeen = "2024-10-05 12:00",
             count = 1,
             lastInstanceID = 1,
-            note = "A guy who can’t take no for an answer, obsessed with power, and constantly trying to convince everyone (and himself) that he’s not the bad guy"
+            note = "A guy who can’t take no for an answer, obsessed with power, and constantly trying to convince everyone (and himself) that he’s not the bad guy",
+            class = "WARRIOR"
         }
     end
 

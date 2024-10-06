@@ -13,6 +13,16 @@ function GetFullPlayerName(name, realm)
     return name .. "-" .. realm
 end
 
+-- Function to colorize text by class
+function ColorizeNameByClass(playerName, classFileName)
+    if classFileName and RAID_CLASS_COLORS[classFileName] then
+        local classColor = RAID_CLASS_COLORS[classFileName]
+        return format("|cFF%02x%02x%02x%s|r", classColor.r * 255, classColor.g * 255, classColor.b * 255, playerName)
+    else
+        return playerName -- Fallback if class is not found
+    end
+end
+
 -- Get the current timestamp
 function GetTimestamp()
     return date("%Y-%m-%d %H:%M:%S")
@@ -38,6 +48,8 @@ function Reckoning:UpdatePartyMembers()
         self:Print("Updating raid members...")
         for i = 1, numGroupMembers do
             local name, realm = UnitName("raid" .. i)
+            local class, classFileName = UnitClass("raid" .. i)
+
             if name then
                 local fullName = GetFullPlayerName(name, realm)
                 if fullName ~= fullPlayerName then
@@ -71,9 +83,10 @@ function Reckoning:UpdatePartyMembers()
                             count = 1,
                             lastInstanceID = instanceID,
                             score = 0,
-                            note = nil
+                            note = nil,
+                            class = classFileName
                         }
-                        self:Print("Added new player to ReckoningDB: " .. fullName)
+                        self:Print("Added new player to ReckoningDB: " .. fullName .. " - " .. class)
                     end
                 end
             end
@@ -82,6 +95,8 @@ function Reckoning:UpdatePartyMembers()
         self:Print("Updating party members...")
         for i = 1, numGroupMembers - 1 do  -- We subtract 1 because "party" doesn't include the player themselves
             local name, realm = UnitName("party" .. i)
+            local class, classFileName = UnitClass("party" .. i)
+
             if name then
                 local fullName = GetFullPlayerName(name, realm)
                 if fullName ~= fullPlayerName then
@@ -114,9 +129,10 @@ function Reckoning:UpdatePartyMembers()
                             count = 1,
                             lastInstanceID = instanceID,
                             score = 0,
-                            note = nil
+                            note = nil,
+                            class = classFileName
                         }
-                        self:Print("Added new player to ReckoningDB: " .. fullName)
+                        self:Print("Added new player to ReckoningDB: " .. fullName .. " - " .. class)
                     end
                 end
             end

@@ -29,19 +29,21 @@ function Reckoning:ShowPreviousGroupPopup()
     scrollContainer:AddChild(scroll)
 
     -- Function to create score buttons for each player
-    local function CreateScoreButtons(playerName)
+    local function CreateScoreButtons(playerName, info)
         local group = AceGUI:Create("SimpleGroup")
         group:SetFullWidth(true)
         group:SetLayout("Flow")
 
         -- Add player name label
         local nameLabel = AceGUI:Create("Label")
-        nameLabel:SetText(playerName)
+        nameLabel:SetText(ColorizeNameByClass(playerName, info.class))
         nameLabel:SetWidth(150)
         group:AddChild(nameLabel)
 
-        -- Get current score for the player if it exists
-        local currentScore = self.db.factionrealm.players[playerName] and self.db.factionrealm.players[playerName].score or nil
+        -- Get current score and note for the player if they exist
+        local playerData = Reckoning.db.factionrealm.players[playerName] or {}
+        local currentScore = playerData.score or nil
+        local currentNote = playerData.note or ""
 
         -- Store the button that matches the current score, if any
         local currentScoreButton = nil
@@ -83,27 +85,26 @@ function Reckoning:ShowPreviousGroupPopup()
             group:AddChild(button)
         end
 
-        -- Add player description label
-        local descriptionLabel = AceGUI:Create("Label")
-        descriptionLabel:SetText("Note:")
-        descriptionLabel:SetWidth(80)
-        group:AddChild(descriptionLabel)
-
-        -- Create an edit box for the player description
-        local editBox = AceGUI:Create("EditBox")
-        editBox:SetWidth(300)
-        editBox:SetText(self.db.factionrealm.players[playerName] and self.db.factionrealm.players[playerName].note or "")
-        editBox:SetCallback("OnTextChanged", function(widget, event, text)
-            self.db.factionrealm.players[playerName].note = text
+        -- Add a text box for notes
+        local noteBox = AceGUI:Create("EditBox")
+        noteBox:SetLabel("Note:")
+        noteBox:SetText(currentNote)
+        noteBox:SetWidth(250)
+        noteBox:SetCallback("OnEnterPressed", function(widget, event, text)
+            -- Save the note to the database
+            Reckoning.db.factionrealm.players[playerName] = Reckoning.db.factionrealm.players[playerName] or {}
+            Reckoning.db.factionrealm.players[playerName].note = text
+            print("Note for " .. playerName .. ": " .. text)
         end)
-        group:AddChild(editBox)
+
+        group:AddChild(noteBox)
 
         scroll:AddChild(group)
     end
 
     -- Create a group with buttons for each player
     for playerName in pairs(previousGroupMembers) do
-        CreateScoreButtons(playerName)
+        CreateScoreButtons(playerName, self.db.factionrealm.players[playerName])
     end
 
     -- Close button at the bottom
