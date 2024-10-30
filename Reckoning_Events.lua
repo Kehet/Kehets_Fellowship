@@ -16,6 +16,43 @@ function Reckoning:ShowKnownPlayers()
     end
 end
 
+-- Function to add a score and optional note for a player
+function Reckoning:AddScore(playerName, score, note)
+    local fullPlayerName = playerName
+
+    -- Validate score input
+    local numericScore = tonumber(score)
+    if not numericScore or numericScore < -2 or numericScore > 2 then
+        self:Print("Error: Score must be between -2 and 2.")
+        return
+    end
+
+    -- Ensure the player exists in the database
+    if not self.db.factionrealm.players[fullPlayerName] then
+        self.db.factionrealm.players[fullPlayerName] = {
+            lastSeen = nil,
+            count = 0,
+            lastInstanceID = nil,
+            score = numericScore,
+            note = note or nil,
+            class = nil
+        }
+        self:Print("Player " .. fullPlayerName .. " added with score: " .. numericScore)
+    else
+        -- Update score and note
+        self.db.factionrealm.players[fullPlayerName].score = numericScore
+        if note then
+            self.db.factionrealm.players[fullPlayerName].note = note
+        end
+        self:Print("Player " .. fullPlayerName .. " updated with score: " .. numericScore)
+    end
+
+    -- If a note was provided, display it
+    if note then
+        self:Print("Note added: " .. note)
+    end
+end
+
 -- Handle when the group is left
 function Reckoning:OnGroupLeft()
     -- Store the players in the previous group

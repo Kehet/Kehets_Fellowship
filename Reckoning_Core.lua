@@ -45,7 +45,7 @@ function Reckoning:UpdatePartyMembers()
 
     -- Process raid members
     if IsInRaid() then
-        self:Print("Updating raid members...")
+        -- self:Print("Updating raid members...")
         for i = 1, numGroupMembers do
             local name, realm = UnitName("raid" .. i)
             local class, classFileName = UnitClass("raid" .. i)
@@ -58,20 +58,24 @@ function Reckoning:UpdatePartyMembers()
                     -- Add new players to the current session's party members (do not remove players who leave)
                     if not partyMembers[fullName] then
                         partyMembers[fullName] = true
-                        self:Print("New player joined your raid: " .. fullName)
+                        -- self:Print("New player joined your raid: " .. fullName)
                     end
 
                     -- Update ReckoningDB
                     if self.db.factionrealm.players[fullName] then
-                        if self.db.factionrealm.players[fullName].lastInstanceID ~= instanceID then
+                        if self.db.factionrealm.players[fullName].lastInstanceID ~= instanceID and instanceID ~= nil then
                             self.db.factionrealm.players[fullName].lastInstanceID = instanceID
                             self.db.factionrealm.players[fullName].count = self.db.factionrealm.players[fullName].count + 1
 
                             -- Display player's score when they join
                             local score = self.db.factionrealm.players[fullName].score
                             local note = self.db.factionrealm.players[fullName].note
+                            local lastSeen = self.db.factionrealm.players[fullName].lastSeen
+
+                            self:Print(fullName .. " was last seen " .. lastSeen)
+
                             if score ~= 0 or (note ~= nil and note ~= "") then
-                                self:Print(fullName .. " has a score of " .. score)
+                                self:Print("Score: " .. score)
                                 if note ~= nil and note ~= "" then
                                     self:Print("Note: " .. note);
                                 end
@@ -86,13 +90,13 @@ function Reckoning:UpdatePartyMembers()
                             note = nil,
                             class = classFileName
                         }
-                        self:Print("Added new player to ReckoningDB: " .. fullName .. " - " .. class)
+                        self:Print("New player: " .. fullName .. " - " .. class)
                     end
                 end
             end
         end
     elseif IsInGroup() then
-        self:Print("Updating party members...")
+        -- self:Print("Updating party members...")
         for i = 1, numGroupMembers - 1 do  -- We subtract 1 because "party" doesn't include the player themselves
             local name, realm = UnitName("party" .. i)
             local class, classFileName = UnitClass("party" .. i)
@@ -104,18 +108,22 @@ function Reckoning:UpdatePartyMembers()
 
                     if not partyMembers[fullName] then
                         partyMembers[fullName] = true
-                        self:Print("New player joined your party: " .. fullName)
+                        -- self:Print("New player joined your party: " .. fullName)
                     end
 
                     -- Update ReckoningDB
                     if self.db.factionrealm.players[fullName] then
-                        if self.db.factionrealm.players[fullName].lastInstanceID ~= instanceID then
+                        if self.db.factionrealm.players[fullName].lastInstanceID ~= instanceID and instanceID ~= nil then
                             self.db.factionrealm.players[fullName].lastInstanceID = instanceID
                             self.db.factionrealm.players[fullName].count = self.db.factionrealm.players[fullName].count + 1
 
                             -- Display player's score when they join
                             local score = self.db.factionrealm.players[fullName].score
                             local note = self.db.factionrealm.players[fullName].note
+                            local lastSeen = self.db.factionrealm.players[fullName].lastSeen
+
+                            self:Print(fullName .. " was last seen " .. lastSeen)
+
                             if score ~= 0 or (note ~= nil and note ~= "") then
                                 self:Print(fullName .. " has a score of " .. score)
                                 if note ~= nil and note ~= "" then
@@ -132,12 +140,12 @@ function Reckoning:UpdatePartyMembers()
                             note = nil,
                             class = classFileName
                         }
-                        self:Print("Added new player to ReckoningDB: " .. fullName .. " - " .. class)
+                        self:Print("New player: " .. fullName .. " - " .. class)
                     end
                 end
             end
         end
     else
-        self:Print("You are not in a party or raid.")
+        -- self:Print("You are not in a party or raid.")
     end
 end

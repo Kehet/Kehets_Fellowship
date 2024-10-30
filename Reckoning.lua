@@ -21,7 +21,7 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reckoning", {
     OnClick = function(self, button)
         if button == "LeftButton" then
             -- Open the GroupScore player tracking screen or other main functionality
-            Reckoning:Print("Opening Reckoning...")
+            -- Reckoning:Print("Opening Reckoning...")
             Reckoning:ShowPreviousGroupPopup() -- Example, replace with your main functionality
         elseif button == "RightButton" then
             -- Show some additional options or a menu, if you want
@@ -62,7 +62,7 @@ end
 
 -- Slash command handler
 function Reckoning:HandleSlashCommand(input)
-    local command = input:lower()
+    local command, playerName, score, note = self:GetArgs(input:lower(), 4)
 
     if command == "show" then
         self:ShowKnownPlayers()
@@ -79,12 +79,15 @@ function Reckoning:HandleSlashCommand(input)
     elseif command == "toggleicon" then
         self:ToggleMinimapIcon()
         self:Print("Toggled minimap icon.")
+    elseif command == "add" then
+        self:AddScore(playerName, score, note)
     else
         self:Print("Unknown command.")
         self:Print(" '/rec show' to list all known players")
         self:Print(" '/rec reset' to clear all known players")
         self:Print(" '/rec reopen' to reopen the previous group popup")
         self:Print(" '/rec test' to test with fake data")
-        self:Print(" '/diky toggleicon' to show/hide the minimap icon")
+        self:Print(" '/rec toggleicon' to show/hide the minimap icon")
+        self:Print(" '/rec add <playerName> <score> [note]")
     end
 end
