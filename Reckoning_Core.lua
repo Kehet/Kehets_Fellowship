@@ -8,9 +8,9 @@ function GetFullPlayerName(name, realm)
         name = UnitName("player")
     end
     if not realm or realm == "" then
-        return name
+        return string.lower(name)
     end
-    return name .. "-" .. realm
+    return string.lower(name .. "-" .. realm)
 end
 
 -- Function to colorize text by class

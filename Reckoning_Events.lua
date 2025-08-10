@@ -7,10 +7,13 @@ function Reckoning:ShowKnownPlayers()
         self:Print("No players found in the database.")
     else
         for name, info in pairs(self.db.factionrealm.players) do
+            local lastSeenText = info.lastSeen and info.lastSeen or "Never"
+            local class = info.class and info.class or "Unknown"
+
             if info.note ~= nil and info.note ~= "" then
-                self:Print(name .. " - " .. info.class .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score .. " - Note: " .. info.note)
+                self:Print(name .. " - " .. class .. " - Last seen on " .. lastSeenText .. " - Seen " .. info.count .. " times - Score: " .. info.score .. " - Note: " .. info.note)
             else
-                self:Print(name .. " - " .. info.class .. " - Last seen on " .. info.lastSeen .. " - Seen " .. info.count .. " times - Score: " .. info.score)
+                self:Print(name .. " - " .. class .. " - Last seen on " .. lastSeenText .. " - Seen " .. info.count .. " times - Score: " .. info.score)
             end
         end
     end
