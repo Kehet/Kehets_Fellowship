@@ -56,6 +56,22 @@ function Reckoning:AddScore(playerName, score, note)
     end
 end
 
+-- Function to remove all data for a player from the database
+function Reckoning:RemoveScore(playerName)
+    local fullPlayerName = playerName
+
+    -- Check if the player exists in the database
+    if not self.db.factionrealm.players[fullPlayerName] then
+        self:Print("Error: Player " .. fullPlayerName .. " not found in database.")
+        return
+    end
+
+    -- Remove the player from the database
+    self.db.factionrealm.players[fullPlayerName] = nil
+    self:Print("Player " .. fullPlayerName .. " has been removed from the database.")
+end
+
+
 -- Handle when the group is left
 function Reckoning:OnGroupLeft()
     -- Store the players in the previous group

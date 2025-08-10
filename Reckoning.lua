@@ -81,6 +81,8 @@ function Reckoning:HandleSlashCommand(input)
         self:Print("Toggled minimap icon.")
     elseif command == "add" then
         self:AddScore(playerName, score, note)
+    elseif command == "remove" or command == "delete" then
+        self:RemoveScore(playerName)
     else
         self:Print("Unknown command.")
         self:Print(" '/rec show' to list all known players")
@@ -89,5 +91,6 @@ function Reckoning:HandleSlashCommand(input)
         self:Print(" '/rec test' to test with fake data")
         self:Print(" '/rec toggleicon' to show/hide the minimap icon")
         self:Print(" '/rec add <playerName> <score> [note]")
+        self:Print(" '/rec remove <playerName>")
     end
 end
