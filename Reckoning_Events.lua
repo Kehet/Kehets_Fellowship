@@ -71,6 +71,77 @@ function Reckoning:RemoveScore(playerName)
     self:Print("Player " .. fullPlayerName .. " has been removed from the database.")
 end
 
+function Reckoning:ShowResetConfirmation()
+    local AceGUI = LibStub("AceGUI-3.0")
+
+    -- Count total entries in database
+    local totalEntries = 0
+    for _ in pairs(self.db.factionrealm.players) do
+        totalEntries = totalEntries + 1
+    end
+
+    -- Create confirmation frame
+    local frame = AceGUI:Create("Frame")
+    frame:SetTitle("Reset Database Confirmation")
+    frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
+    frame:SetLayout("Flow")
+    frame:SetWidth(400)
+    frame:SetHeight(200)
+
+    -- Warning message
+    local warningLabel = AceGUI:Create("Label")
+    warningLabel:SetText("|cFFFF0000WARNING:|r You are about to reset the entire player database!")
+    warningLabel:SetFullWidth(true)
+    frame:AddChild(warningLabel)
+
+    -- Count information
+    local countLabel = AceGUI:Create("Label")
+    countLabel:SetText("This will permanently delete " .. totalEntries .. " player entries from your database.")
+    countLabel:SetFullWidth(true)
+    frame:AddChild(countLabel)
+
+    -- Spacer
+    local spacer = AceGUI:Create("Label")
+    spacer:SetText(" ")
+    spacer:SetFullWidth(true)
+    frame:AddChild(spacer)
+
+    -- Confirmation question
+    local confirmLabel = AceGUI:Create("Label")
+    confirmLabel:SetText("Are you sure you want to continue?")
+    confirmLabel:SetFullWidth(true)
+    frame:AddChild(confirmLabel)
+
+    -- Button container
+    local buttonGroup = AceGUI:Create("SimpleGroup")
+    buttonGroup:SetFullWidth(true)
+    buttonGroup:SetLayout("Flow")
+    frame:AddChild(buttonGroup)
+
+    -- Confirm button (red)
+    local confirmButton = AceGUI:Create("Button")
+    confirmButton:SetText("|cFFFF0000Yes, Reset All|r")
+    confirmButton:SetWidth(150)
+    confirmButton:SetCallback("OnClick", function()
+        self.db.factionrealm.players = {}  -- Reset the factionrealm-specific players database
+        self:Print("All " .. totalEntries .. " known players have been reset.")
+        frame:Hide()
+    end)
+    buttonGroup:AddChild(confirmButton)
+
+    -- Cancel button (green)
+    local cancelButton = AceGUI:Create("Button")
+    cancelButton:SetText("|cFF00FF00Cancel|r")
+    cancelButton:SetWidth(100)
+    cancelButton:SetCallback("OnClick", function()
+        self:Print("Reset operation cancelled.")
+        frame:Hide()
+    end)
+    buttonGroup:AddChild(cancelButton)
+
+    -- Show the frame
+    frame:Show()
+end
 
 -- Handle when the group is left
 function Reckoning:OnGroupLeft()

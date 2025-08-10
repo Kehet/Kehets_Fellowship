@@ -67,8 +67,7 @@ function Reckoning:HandleSlashCommand(input)
     if command == "show" then
         self:ShowKnownPlayers()
     elseif command == "reset" then
-        self.db.factionrealm.players = {}  -- Reset the factionrealm-specific players database
-        self:Print("All known players have been reset.")
+        self:ShowResetConfirmation()
     elseif command == "reopen" then
         -- Reopen the previous group popup
         self:ShowPreviousGroupPopup()
