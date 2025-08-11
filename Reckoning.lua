@@ -62,7 +62,7 @@ end
 
 -- Slash command handler
 function Reckoning:HandleSlashCommand(input)
-    local command, playerName, score, note = self:GetArgs(input:lower(), 4)
+    local command, playerName, score, note, tags = self:GetArgs(input:lower(), 5)
 
     if command == "show" then
         self:ShowKnownPlayers()
@@ -79,7 +79,7 @@ function Reckoning:HandleSlashCommand(input)
         self:ToggleMinimapIcon()
         self:Print("Toggled minimap icon.")
     elseif command == "add" then
-        self:AddScore(playerName, score, note)
+        self:AddScore(playerName, score, note, tags)
     elseif command == "remove" or command == "delete" then
         self:RemoveScore(playerName)
     else
@@ -89,7 +89,7 @@ function Reckoning:HandleSlashCommand(input)
         self:Print(" '/rec reopen' to reopen the previous group popup")
         self:Print(" '/rec test' to test with fake data")
         self:Print(" '/rec toggleicon' to show/hide the minimap icon")
-        self:Print(" '/rec add <playerName> <score> [note]")
+        self:Print(" '/rec add <playerName> <score> [note [tags]]' - tags are comma-separated")
         self:Print(" '/rec remove <playerName>")
     end
 end

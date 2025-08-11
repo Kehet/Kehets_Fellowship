@@ -7,20 +7,33 @@ function Reckoning:ShowKnownPlayers()
         self:Print("No players found in the database.")
     else
         for name, info in pairs(self.db.factionrealm.players) do
+            -- Ensure backward compatibility by initializing tags field if it doesn't exist
+            if not info.tags then
+                info.tags = {}
+            end
+
             local lastSeenText = info.lastSeen and info.lastSeen or "Never"
             local class = info.class and info.class or "Unknown"
+            local tagsText = ""
+
+            -- Format tags if they exist
+            if info.tags and #info.tags > 0 then
+                tagsText = " - Tags: " .. table.concat(info.tags, ", ")
+            end
+
+            local baseInfo = name .. " - " .. class .. " - Last seen on " .. lastSeenText .. " - Seen " .. info.count .. " times - Score: " .. info.score
 
             if info.note ~= nil and info.note ~= "" then
-                self:Print(name .. " - " .. class .. " - Last seen on " .. lastSeenText .. " - Seen " .. info.count .. " times - Score: " .. info.score .. " - Note: " .. info.note)
+                self:Print(baseInfo .. " - Note: " .. info.note .. tagsText)
             else
-                self:Print(name .. " - " .. class .. " - Last seen on " .. lastSeenText .. " - Seen " .. info.count .. " times - Score: " .. info.score)
+                self:Print(baseInfo .. tagsText)
             end
         end
     end
 end
 
 -- Function to add a score and optional note for a player
-function Reckoning:AddScore(playerName, score, note)
+function Reckoning:AddScore(playerName, score, note, tags)
     local fullPlayerName = playerName
 
     -- Validate score input
@@ -28,6 +41,17 @@ function Reckoning:AddScore(playerName, score, note)
     if not numericScore or numericScore < -2 or numericScore > 2 then
         self:Print("Error: Score must be between -2 and 2.")
         return
+    end
+
+    -- Parse tags if provided (comma-separated string)
+    local tagList = {}
+    if tags and tags ~= "" then
+        for tag in string.gmatch(tags, "[^,]+") do
+            local trimmedTag = string.match(tag, "^%s*(.-)%s*$") -- Trim whitespace
+            if trimmedTag ~= "" then
+                table.insert(tagList, trimmedTag)
+            end
+        end
     end
 
     -- Ensure the player exists in the database
@@ -38,14 +62,18 @@ function Reckoning:AddScore(playerName, score, note)
             lastInstanceID = nil,
             score = numericScore,
             note = note or nil,
+            tags = tagList,
             class = nil
         }
         self:Print("Player " .. fullPlayerName .. " added with score: " .. numericScore)
     else
-        -- Update score and note
+        -- Update score, note, and tags
         self.db.factionrealm.players[fullPlayerName].score = numericScore
         if note then
             self.db.factionrealm.players[fullPlayerName].note = note
+        end
+        if tags then
+            self.db.factionrealm.players[fullPlayerName].tags = tagList
         end
         self:Print("Player " .. fullPlayerName .. " updated with score: " .. numericScore)
     end
@@ -53,6 +81,11 @@ function Reckoning:AddScore(playerName, score, note)
     -- If a note was provided, display it
     if note then
         self:Print("Note added: " .. note)
+    end
+
+    -- If tags were provided, display them
+    if #tagList > 0 then
+        self:Print("Tags added: " .. table.concat(tagList, ", "))
     end
 end
 

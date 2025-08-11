@@ -40,10 +40,12 @@ function Reckoning:ShowPreviousGroupPopup()
         nameLabel:SetWidth(150)
         group:AddChild(nameLabel)
 
-        -- Get current score and note for the player if they exist
+        -- Get current score, note, and tags for the player if they exist
         local playerData = Reckoning.db.factionrealm.players[playerName] or {}
         local currentScore = playerData.score or nil
         local currentNote = playerData.note or ""
+        local currentTags = playerData.tags or {}
+        local currentTagsText = table.concat(currentTags, ", ")
 
         -- Store the button that matches the current score, if any
         local currentScoreButton = nil
@@ -98,6 +100,30 @@ function Reckoning:ShowPreviousGroupPopup()
         end)
 
         group:AddChild(noteBox)
+
+        -- Add a text box for tags
+        local tagsBox = AceGUI:Create("EditBox")
+        tagsBox:SetLabel("Tags (comma-separated):")
+        tagsBox:SetText(currentTagsText)
+        tagsBox:SetWidth(250)
+        tagsBox:SetCallback("OnEnterPressed", function(widget, event, text)
+            -- Parse tags and save to the database
+            local tagList = {}
+            if text and text ~= "" then
+                for tag in string.gmatch(text, "[^,]+") do
+                    local trimmedTag = string.match(tag, "^%s*(.-)%s*$") -- Trim whitespace
+                    if trimmedTag ~= "" then
+                        table.insert(tagList, trimmedTag)
+                    end
+                end
+            end
+
+            Reckoning.db.factionrealm.players[playerName] = Reckoning.db.factionrealm.players[playerName] or {}
+            Reckoning.db.factionrealm.players[playerName].tags = tagList
+            print("Tags for " .. playerName .. ": " .. table.concat(tagList, ", "))
+        end)
+
+        group:AddChild(tagsBox)
 
         scroll:AddChild(group)
     end

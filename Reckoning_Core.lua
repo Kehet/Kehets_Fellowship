@@ -88,6 +88,7 @@ function Reckoning:UpdatePartyMembers()
                             lastInstanceID = instanceID,
                             score = 0,
                             note = nil,
+                            tags = {},
                             class = classFileName
                         }
                         self:Print("New player: " .. fullName .. " - " .. class)
@@ -138,6 +139,7 @@ function Reckoning:UpdatePartyMembers()
                             lastInstanceID = instanceID,
                             score = 0,
                             note = nil,
+                            tags = {},
                             class = classFileName
                         }
                         self:Print("New player: " .. fullName .. " - " .. class)
