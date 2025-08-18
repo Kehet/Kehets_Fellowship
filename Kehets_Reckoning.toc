@@ -1,0 +1,13 @@
+## Interface: 50500
+## Title: |cFF009900Kehet's|r Reckoning
+## Notes: Reckoning lets you track, rate, and remember group members you encounter in WoW
+## Author: Kehet
+## Version: 1.0
+## SavedVariables: ReckoningDB
+## Dependencies: Ace3
+
+Kehets_Reckoning.lua
+Kehets_Reckoning_Core.lua
+Kehets_Reckoning_Events.lua
+Kehets_Reckoning_Popup.lua
+Kehets_Reckoning_Tooltip.lua

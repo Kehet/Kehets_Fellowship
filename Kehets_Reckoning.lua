@@ -52,6 +52,7 @@ end
 
 -- Register events using AceEvent
 function Reckoning:OnEnable()
+    self:Print("Enabled")
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdatePartyMembers")
     self:RegisterEvent("PARTY_LEADER_CHANGED", "UpdatePartyMembers")
     self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdatePartyMembers")
