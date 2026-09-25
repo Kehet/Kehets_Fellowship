@@ -4,8 +4,9 @@
 ## Author: Kehet
 ## Version: @project-version@
 ## SavedVariables: ReckoningDB
-## Dependencies: Ace3
+## OptionalDeps: Ace3
 
+embeds.xml
 Kehets_Reckoning.lua
 Kehets_Reckoning_Core.lua
 Kehets_Reckoning_Events.lua
