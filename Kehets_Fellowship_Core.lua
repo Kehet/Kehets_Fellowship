@@ -28,6 +28,30 @@ function GetTimestamp()
     return date("%Y-%m-%d %H:%M:%S")
 end
 
+-- Tag names for the group roles returned by UnitGroupRolesAssigned
+local roleTags = {
+    TANK = "Tank",
+    HEALER = "Healer",
+    DAMAGER = "DPS",
+}
+
+-- Get the role tag for a group unit, or nil if the unit has no role assigned
+function GetRoleTag(unit)
+    return roleTags[UnitGroupRolesAssigned(unit)]
+end
+
+-- Add a tag to a tag list unless it is already there (case-insensitive).
+-- Returns true if the tag was added.
+function AddTagIfMissing(tags, tag)
+    for _, existing in ipairs(tags) do
+        if string.lower(existing) == string.lower(tag) then
+            return false
+        end
+    end
+    table.insert(tags, tag)
+    return true
+end
+
 -- Get the current instance ID
 function GetCurrentInstanceID()
     local _, _, _, _, _, _, _, instanceID = GetInstanceInfo()
@@ -75,8 +99,9 @@ function Fellowship:ProcessGroupUnit(unit, fullPlayerName, instanceID)
     local info = self.db.factionrealm.players[fullName]
     local isNewToGroup = not partyMembers[fullName]
 
-    -- Add new players to the current session's party members (do not remove players who leave)
-    partyMembers[fullName] = true
+    -- Add new players to the current session's party members (do not remove players who leave).
+    -- The value is the player's role tag, kept from an earlier update if no role is assigned now.
+    partyMembers[fullName] = GetRoleTag(unit) or partyMembers[fullName] or true
 
     if not info then
         self.db.factionrealm.players[fullName] = {
