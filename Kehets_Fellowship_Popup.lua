@@ -29,7 +29,7 @@ function Fellowship:ShowPreviousGroupPopup()
     scrollContainer:AddChild(scroll)
 
     -- Function to create score buttons for each player
-    local function CreateScoreButtons(playerName, info)
+    local function CreateScoreButtons(playerName, info, roleTag)
         local group = AceGUI:Create("SimpleGroup")
         group:SetFullWidth(true)
         group:SetLayout("Flow")
@@ -42,6 +42,13 @@ function Fellowship:ShowPreviousGroupPopup()
 
         -- Get current score, note, and tags for the player if they exist
         local playerData = Fellowship.db.factionrealm.players[playerName] or {}
+
+        -- Tag the player with the role they had in the group, unless they already have that tag
+        if type(roleTag) == "string" then
+            playerData.tags = playerData.tags or {}
+            AddTagIfMissing(playerData.tags, roleTag)
+        end
+
         local currentScore = playerData.score or nil
         local currentNote = playerData.note or ""
         local currentTags = playerData.tags or {}
@@ -129,8 +136,8 @@ function Fellowship:ShowPreviousGroupPopup()
     end
 
     -- Create a group with buttons for each player
-    for playerName in pairs(previousGroupMembers) do
-        CreateScoreButtons(playerName, self.db.factionrealm.players[playerName])
+    for playerName, roleTag in pairs(previousGroupMembers) do
+        CreateScoreButtons(playerName, self.db.factionrealm.players[playerName], roleTag)
     end
 
     -- Close button at the bottom

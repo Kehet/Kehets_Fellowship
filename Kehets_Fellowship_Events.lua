@@ -192,11 +192,11 @@ end
 function Fellowship:PopulateFakeData()
     -- Add some fake player names to previousGroupMembers
     previousGroupMembers = {
-        ["Thrall-AzjolNerub"] = true,
-        ["Jaina-Proudmoore"] = true,
-        ["Sylvanas-Windrunner"] = true,
-        ["Anduin-Wrynn"] = true,
-        ["Illidan-Stormrage"] = true
+        ["Thrall-AzjolNerub"] = "Healer",
+        ["Jaina-Proudmoore"] = "DPS",
+        ["Sylvanas-Windrunner"] = "DPS",
+        ["Anduin-Wrynn"] = "Healer",
+        ["Illidan-Stormrage"] = "Tank"
     }
 
     -- Add some initial fake scores to the factionrealm-specific database

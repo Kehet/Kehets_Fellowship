@@ -12,6 +12,8 @@ When you leave a group, a window opens with every player from that group. For ea
 - Write a note and press Enter to save it.
 - Add comma-separated tags and press Enter to save them.
 
+The window adds the role each player had in the group (Tank, Healer or DPS) to their tags, unless they already have that tag.
+
 When you mouse over a known player, the tooltip shows their score, note and when you last saw them. Positive scores are green and negative scores are red.
 
 The player list is stored separately for each faction on each realm.
