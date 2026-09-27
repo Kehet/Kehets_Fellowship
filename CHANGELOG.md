@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.1.0...2.2.0) (2026-09-27)
+
+
+### Features
+
+* tag vote-kicked players and save the kick reason to their note ([#12](https://github.com/Kehet/Kehets_Fellowship/issues/12)) ([b6160de](https://github.com/Kehet/Kehets_Fellowship/commit/b6160de89135f35824ae5e98fec8867dc5eab34f))
+
 ## [2.1.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.0.0...2.1.0) (2026-09-27)
 
 
