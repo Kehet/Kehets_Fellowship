@@ -20,7 +20,17 @@ The player list is stored separately for each faction on each realm.
 
 ## Minimap button
 
-Left-click the minimap button to open the rating window for your previous group again.
+Left-click the minimap button to open the rating window for your previous group again. Right-click it to open the player list.
+
+## Player list
+
+The player list window shows every known player in a table with their class, score, how many times you grouped, when you last grouped, tags and note.
+
+- Click a column header to sort by that column. Click it again to reverse the order.
+- Type in the search box to filter by name, class, tags or note.
+- Use the score menu to show only positive, neutral or negative players.
+- Use the Previous and Next buttons to move between pages of 25 players.
+- Mouse over a row to see the full note and tags.
 
 ## Commands
 
@@ -28,6 +38,7 @@ Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 
 | Command | Action |
 |---|---|
+| `/fellow list` | Open the player list window |
 | `/fellow show` | List all known players in chat |
 | `/fellow reopen` | Open the rating window for your previous group again |
 | `/fellow add <player> <score> [note [tags]]` | Set a score, and optionally a note and comma-separated tags |

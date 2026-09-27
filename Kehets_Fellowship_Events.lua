@@ -87,6 +87,8 @@ function Fellowship:AddScore(playerName, score, note, tags)
     if #tagList > 0 then
         self:Print("Tags added: " .. table.concat(tagList, ", "))
     end
+
+    self:RefreshPlayerList()
 end
 
 -- Function to remove all data for a player from the database
@@ -102,6 +104,7 @@ function Fellowship:RemoveScore(playerName)
     -- Remove the player from the database
     self.db.factionrealm.players[fullPlayerName] = nil
     self:Print("Player " .. fullPlayerName .. " has been removed from the database.")
+    self:RefreshPlayerList()
 end
 
 function Fellowship:ShowResetConfirmation()
@@ -158,6 +161,7 @@ function Fellowship:ShowResetConfirmation()
     confirmButton:SetCallback("OnClick", function()
         self.db.factionrealm.players = {}  -- Reset the factionrealm-specific players database
         self:Print("All " .. totalEntries .. " known players have been reset.")
+        self:RefreshPlayerList()
         frame:Hide()
     end)
     buttonGroup:AddChild(confirmButton)

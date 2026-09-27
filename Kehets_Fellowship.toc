@@ -11,4 +11,5 @@ Kehets_Fellowship.lua
 Kehets_Fellowship_Core.lua
 Kehets_Fellowship_Events.lua
 Kehets_Fellowship_Popup.lua
+Kehets_Fellowship_List.lua
 Kehets_Fellowship_Tooltip.lua
