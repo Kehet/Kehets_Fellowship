@@ -1,5 +1,5 @@
 -- Initialize Ace3 with AceConsole for slash commands, AceEvent for event handling, and AceDB for saved variables
-Reckoning = LibStub("AceAddon-3.0"):NewAddon("Reckoning", "AceConsole-3.0", "AceEvent-3.0")
+Fellowship = LibStub("AceAddon-3.0"):NewAddon("Kehet's Fellowship", "AceConsole-3.0", "AceEvent-3.0")
 
 -- Default structure for saved variables (faction-realm specific)
 local defaultSavedVariables = {
@@ -14,23 +14,23 @@ local defaultSavedVariables = {
 }
 
 -- LibDataBroker object for the minimap icon
-local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reckoning", {
+local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fellowship", {
     type = "data source",
-    text = "Reckoning",
+    text = "Kehet's Fellowship",
     icon = "Interface\\Icons\\inv_hammer_16",
     OnClick = function(self, button)
         if button == "LeftButton" then
             -- Open the GroupScore player tracking screen or other main functionality
-            -- Reckoning:Print("Opening Reckoning...")
-            Reckoning:ShowPreviousGroupPopup() -- Example, replace with your main functionality
+            -- Fellowship:Print("Opening Fellowship...")
+            Fellowship:ShowPreviousGroupPopup() -- Example, replace with your main functionality
         elseif button == "RightButton" then
             -- Show some additional options or a menu, if you want
-            Reckoning:Print("Reckoning menu or options can go here.")
+            Fellowship:Print("Fellowship menu or options can go here.")
         end
     end,
     OnTooltipShow = function(tooltip)
-        tooltip:AddLine("Reckoning")
-        tooltip:AddLine("Left-click to open Reckoning.")
+        tooltip:AddLine("Kehet's Fellowship")
+        tooltip:AddLine("Left-click to open Kehet's Fellowship.")
         tooltip:AddLine("Right-click for options.")
     end,
 })
@@ -39,19 +39,19 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reckoning", {
 local icon = LibStub("LibDBIcon-1.0")
 
 -- Initialize the addon and register slash commands
-function Reckoning:OnInitialize()
+function Fellowship:OnInitialize()
     -- Set up AceDB with factionrealm scope
-    self.db = LibStub("AceDB-3.0"):New("ReckoningDB", defaultSavedVariables, true)
+    self.db = LibStub("AceDB-3.0"):New("FellowshipDB", defaultSavedVariables, true)
 
-    icon:Register("Reckoning", ldb, self.db.profile.minimap)
+    icon:Register("Kehet's Fellowship", ldb, self.db.profile.minimap)
 
     -- Register slash commands
-    self:RegisterChatCommand("reckoning", "HandleSlashCommand")
-    self:RegisterChatCommand("rec", "HandleSlashCommand")
+    self:RegisterChatCommand("fellowship", "HandleSlashCommand")
+    self:RegisterChatCommand("fellow", "HandleSlashCommand")
 end
 
 -- Register events using AceEvent
-function Reckoning:OnEnable()
+function Fellowship:OnEnable()
     self:Print("Enabled")
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdatePartyMembers")
     self:RegisterEvent("PARTY_LEADER_CHANGED", "UpdatePartyMembers")
@@ -62,7 +62,7 @@ function Reckoning:OnEnable()
 end
 
 -- Slash command handler
-function Reckoning:HandleSlashCommand(input)
+function Fellowship:HandleSlashCommand(input)
     local command, playerName, score, note, tags = self:GetArgs(input:lower(), 5)
 
     if command == "show" then
@@ -85,12 +85,12 @@ function Reckoning:HandleSlashCommand(input)
         self:RemoveScore(playerName)
     else
         self:Print("Unknown command.")
-        self:Print(" '/rec show' to list all known players")
-        self:Print(" '/rec reset' to clear all known players")
-        self:Print(" '/rec reopen' to reopen the previous group popup")
-        self:Print(" '/rec test' to test with fake data")
-        self:Print(" '/rec toggleicon' to show/hide the minimap icon")
-        self:Print(" '/rec add <playerName> <score> [note [tags]]' - tags are comma-separated")
-        self:Print(" '/rec remove <playerName>")
+        self:Print(" '/fellow show' to list all known players")
+        self:Print(" '/fellow reset' to clear all known players")
+        self:Print(" '/fellow reopen' to reopen the previous group popup")
+        self:Print(" '/fellow test' to test with fake data")
+        self:Print(" '/fellow toggleicon' to show/hide the minimap icon")
+        self:Print(" '/fellow add <playerName> <score> [note [tags]]' - tags are comma-separated")
+        self:Print(" '/fellow remove <playerName>")
     end
 end

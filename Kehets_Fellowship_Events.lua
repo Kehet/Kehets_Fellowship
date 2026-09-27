@@ -1,6 +1,6 @@
 
 -- Slash command handler for showing known players
-function Reckoning:ShowKnownPlayers()
+function Fellowship:ShowKnownPlayers()
     self:Print("List of all known players:")
 
     if next(self.db.factionrealm.players) == nil then
@@ -33,7 +33,7 @@ function Reckoning:ShowKnownPlayers()
 end
 
 -- Function to add a score and optional note for a player
-function Reckoning:AddScore(playerName, score, note, tags)
+function Fellowship:AddScore(playerName, score, note, tags)
     local fullPlayerName = playerName
 
     -- Validate score input
@@ -90,7 +90,7 @@ function Reckoning:AddScore(playerName, score, note, tags)
 end
 
 -- Function to remove all data for a player from the database
-function Reckoning:RemoveScore(playerName)
+function Fellowship:RemoveScore(playerName)
     local fullPlayerName = playerName
 
     -- Check if the player exists in the database
@@ -104,7 +104,7 @@ function Reckoning:RemoveScore(playerName)
     self:Print("Player " .. fullPlayerName .. " has been removed from the database.")
 end
 
-function Reckoning:ShowResetConfirmation()
+function Fellowship:ShowResetConfirmation()
     local AceGUI = LibStub("AceGUI-3.0")
 
     -- Count total entries in database
@@ -177,7 +177,7 @@ function Reckoning:ShowResetConfirmation()
 end
 
 -- Handle when the group is left
-function Reckoning:OnGroupLeft()
+function Fellowship:OnGroupLeft()
     -- Store the players in the previous group
     previousGroupMembers = partyMembers
 
@@ -189,7 +189,7 @@ function Reckoning:OnGroupLeft()
 end
 
 -- Function to populate fake data for testing
-function Reckoning:PopulateFakeData()
+function Fellowship:PopulateFakeData()
     -- Add some fake player names to previousGroupMembers
     previousGroupMembers = {
         ["Thrall-AzjolNerub"] = true,
@@ -258,11 +258,11 @@ function Reckoning:PopulateFakeData()
 end
 
 
-function Reckoning:ToggleMinimapIcon()
+function Fellowship:ToggleMinimapIcon()
     self.db.profile.minimap.hide = not self.db.profile.minimap.hide
     if self.db.profile.minimap.hide then
-        icon:Hide("Reckoning")
+        LibStub("LibDBIcon-1.0"):Hide("Kehet's Fellowship")
     else
-        icon:Show("Reckoning")
+        LibStub("LibDBIcon-1.0"):Show("Kehet's Fellowship")
     end
 end

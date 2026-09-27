@@ -1,14 +1,14 @@
-# Kehet's Reckoning
+# Kehet's Fellowship
 
-A World of Warcraft addon that lets you track, rate and remember the players you group with. If a rogue stole your loot, you get a warning when that player joins your group again.
+A World of Warcraft addon that remembers the great players you meet in groups. Had a healer who kept everyone alive, or a tank who waited for the slow pull? Give them a good score, and Fellowship tells you when they join your group again.
 
 ## How it works
 
-Reckoning remembers every player you group with, in parties and in raids. When you group with a known player again, chat shows when you last saw them, plus their score and note if they have one.
+Fellowship remembers every player you group with, in parties and in raids. When a known player joins your group, chat shows a line with their score, note and when you last grouped with them. Players with a positive score are announced as "Good player joined" in green, so you notice them right away.
 
 When you leave a group, a window opens with every player from that group. For each player you can:
 
-- Give a score from -2 to 2.
+- Give a score from -2 to 2. A positive score marks them as a good player.
 - Write a note and press Enter to save it.
 - Add comma-separated tags and press Enter to save them.
 
@@ -22,17 +22,17 @@ Left-click the minimap button to open the rating window for your previous group 
 
 ## Commands
 
-Use `/rec` or `/reckoning`. Player names use the format `name-realm`.
+Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 
 | Command | Action |
 |---|---|
-| `/rec show` | List all known players in chat |
-| `/rec reopen` | Open the rating window for your previous group again |
-| `/rec add <player> <score> [note [tags]]` | Set a score, and optionally a note and comma-separated tags |
-| `/rec remove <player>` | Remove a player from the list |
-| `/rec reset` | Remove all known players, after a confirmation |
-| `/rec toggleicon` | Show or hide the minimap button |
-| `/rec test` | Load test data and open the rating window |
+| `/fellow show` | List all known players in chat |
+| `/fellow reopen` | Open the rating window for your previous group again |
+| `/fellow add <player> <score> [note [tags]]` | Set a score, and optionally a note and comma-separated tags |
+| `/fellow remove <player>` | Remove a player from the list |
+| `/fellow reset` | Remove all known players, after a confirmation |
+| `/fellow toggleicon` | Show or hide the minimap button |
+| `/fellow test` | Load test data and open the rating window |
 
 ## Requirements
 
