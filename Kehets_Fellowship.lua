@@ -24,14 +24,13 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fello
             -- Fellowship:Print("Opening Fellowship...")
             Fellowship:ShowPreviousGroupPopup() -- Example, replace with your main functionality
         elseif button == "RightButton" then
-            -- Show some additional options or a menu, if you want
-            Fellowship:Print("Fellowship menu or options can go here.")
+            Fellowship:ShowPlayerList()
         end
     end,
     OnTooltipShow = function(tooltip)
         tooltip:AddLine("Kehet's Fellowship")
         tooltip:AddLine("Left-click to open Kehet's Fellowship.")
-        tooltip:AddLine("Right-click for options.")
+        tooltip:AddLine("Right-click to list all known players.")
     end,
 })
 
@@ -65,7 +64,9 @@ end
 function Fellowship:HandleSlashCommand(input)
     local command, playerName, score, note, tags = self:GetArgs(input:lower(), 5)
 
-    if command == "show" then
+    if command == "list" then
+        self:ShowPlayerList()
+    elseif command == "show" then
         self:ShowKnownPlayers()
     elseif command == "reset" then
         self:ShowResetConfirmation()
@@ -85,7 +86,8 @@ function Fellowship:HandleSlashCommand(input)
         self:RemoveScore(playerName)
     else
         self:Print("Unknown command.")
-        self:Print(" '/fellow show' to list all known players")
+        self:Print(" '/fellow list' to open the known players window")
+        self:Print(" '/fellow show' to list all known players in chat")
         self:Print(" '/fellow reset' to clear all known players")
         self:Print(" '/fellow reopen' to reopen the previous group popup")
         self:Print(" '/fellow test' to test with fake data")
