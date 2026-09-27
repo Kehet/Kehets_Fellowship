@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.0.0...2.1.0) (2026-09-27)
+
+
+### Features
+
+* add a player list window with sorting, filtering and pages ([#7](https://github.com/Kehet/Kehets_Fellowship/issues/7)) ([e26d22f](https://github.com/Kehet/Kehets_Fellowship/commit/e26d22f7a03c2c4545fd9f64f84139470a80e0c1))
+* list slash commands in the enabled message ([#9](https://github.com/Kehet/Kehets_Fellowship/issues/9)) ([fa0c214](https://github.com/Kehet/Kehets_Fellowship/commit/fa0c214f0a28677c01be50458072fcc40976d5d5))
+
 ## [2.0.0](https://github.com/Kehet/Kehets_Fellowship/compare/1.0.0...2.0.0) (2026-09-27)
 
 
