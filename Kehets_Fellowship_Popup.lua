@@ -1,8 +1,8 @@
 -- AceGUI is part of the Ace3 library, so we use it to create the prettier UI.
 local AceGUI = LibStub("AceGUI-3.0")
 
--- Function to show a popup for rating all players in the previous group
-function Reckoning:ShowPreviousGroupPopup()
+-- Function to show a popup for remembering players from the previous group
+function Fellowship:ShowPreviousGroupPopup()
     -- If there are no players in the previous group, show a message
     if not previousGroupMembers or next(previousGroupMembers) == nil then
         self:Print("No previous group to show.")
@@ -11,7 +11,7 @@ function Reckoning:ShowPreviousGroupPopup()
 
     -- Create a frame for the AceGUI popup (increased width)
     local frame = AceGUI:Create("Frame")
-    frame:SetTitle("Rate Players in Your Previous Group")
+    frame:SetTitle("Remember Players from Your Last Group")
     frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
     frame:SetLayout("Flow")
     frame:SetWidth(500)  -- Increased width to prevent wrapping
@@ -29,7 +29,7 @@ function Reckoning:ShowPreviousGroupPopup()
     scrollContainer:AddChild(scroll)
 
     -- Function to create score buttons for each player
-    local function CreateScoreButtons(playerName, info)
+    local function CreateScoreButtons(playerName, info, roleTag)
         local group = AceGUI:Create("SimpleGroup")
         group:SetFullWidth(true)
         group:SetLayout("Flow")
@@ -41,7 +41,14 @@ function Reckoning:ShowPreviousGroupPopup()
         group:AddChild(nameLabel)
 
         -- Get current score, note, and tags for the player if they exist
-        local playerData = Reckoning.db.factionrealm.players[playerName] or {}
+        local playerData = Fellowship.db.factionrealm.players[playerName] or {}
+
+        -- Tag the player with the role they had in the group, unless they already have that tag
+        if type(roleTag) == "string" then
+            playerData.tags = playerData.tags or {}
+            AddTagIfMissing(playerData.tags, roleTag)
+        end
+
         local currentScore = playerData.score or nil
         local currentNote = playerData.note or ""
         local currentTags = playerData.tags or {}
@@ -91,11 +98,11 @@ function Reckoning:ShowPreviousGroupPopup()
         local noteBox = AceGUI:Create("EditBox")
         noteBox:SetLabel("Note:")
         noteBox:SetText(currentNote)
-        noteBox:SetWidth(250)
+        noteBox:SetRelativeWidth(0.5)  -- Half the row each, so note and tags share one line
         noteBox:SetCallback("OnEnterPressed", function(widget, event, text)
             -- Save the note to the database
-            Reckoning.db.factionrealm.players[playerName] = Reckoning.db.factionrealm.players[playerName] or {}
-            Reckoning.db.factionrealm.players[playerName].note = text
+            Fellowship.db.factionrealm.players[playerName] = Fellowship.db.factionrealm.players[playerName] or {}
+            Fellowship.db.factionrealm.players[playerName].note = text
             print("Note for " .. playerName .. ": " .. text)
         end)
 
@@ -105,7 +112,7 @@ function Reckoning:ShowPreviousGroupPopup()
         local tagsBox = AceGUI:Create("EditBox")
         tagsBox:SetLabel("Tags (comma-separated):")
         tagsBox:SetText(currentTagsText)
-        tagsBox:SetWidth(250)
+        tagsBox:SetRelativeWidth(0.5)
         tagsBox:SetCallback("OnEnterPressed", function(widget, event, text)
             -- Parse tags and save to the database
             local tagList = {}
@@ -118,8 +125,8 @@ function Reckoning:ShowPreviousGroupPopup()
                 end
             end
 
-            Reckoning.db.factionrealm.players[playerName] = Reckoning.db.factionrealm.players[playerName] or {}
-            Reckoning.db.factionrealm.players[playerName].tags = tagList
+            Fellowship.db.factionrealm.players[playerName] = Fellowship.db.factionrealm.players[playerName] or {}
+            Fellowship.db.factionrealm.players[playerName].tags = tagList
             print("Tags for " .. playerName .. ": " .. table.concat(tagList, ", "))
         end)
 
@@ -129,8 +136,8 @@ function Reckoning:ShowPreviousGroupPopup()
     end
 
     -- Create a group with buttons for each player
-    for playerName in pairs(previousGroupMembers) do
-        CreateScoreButtons(playerName, self.db.factionrealm.players[playerName])
+    for playerName, roleTag in pairs(previousGroupMembers) do
+        CreateScoreButtons(playerName, self.db.factionrealm.players[playerName], roleTag)
     end
 
     -- Close button at the bottom
