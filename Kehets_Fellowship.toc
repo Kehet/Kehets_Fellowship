@@ -1,0 +1,14 @@
+## Interface: 50500
+## Title: |cFF009900Kehet's|r Fellowship
+## Notes: Remember the great players you meet in groups and get notified when they join you again
+## Author: Kehet
+## Version: @project-version@
+## SavedVariables: FellowshipDB
+## OptionalDeps: Ace3
+
+embeds.xml
+Kehets_Fellowship.lua
+Kehets_Fellowship_Core.lua
+Kehets_Fellowship_Events.lua
+Kehets_Fellowship_Popup.lua
+Kehets_Fellowship_Tooltip.lua

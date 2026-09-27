@@ -32,11 +32,11 @@ local function AddPlayerScore(self)
         local fullName = GetFullPlayerName(playerName, playerRealm)
 
 
-        if Reckoning.db.factionrealm.players[fullName] then
+        if Fellowship.db.factionrealm.players[fullName] then
 
-            local score = Reckoning.db.factionrealm.players[fullName].score
-            local note = Reckoning.db.factionrealm.players[fullName].note
-            local lastSeen = Reckoning.db.factionrealm.players[fullName].lastSeen
+            local score = Fellowship.db.factionrealm.players[fullName].score
+            local note = Fellowship.db.factionrealm.players[fullName].note
+            local lastSeen = Fellowship.db.factionrealm.players[fullName].lastSeen
 
             if score then
                 local sr, sg, sb = 1, 1, 1
@@ -48,7 +48,7 @@ local function AddPlayerScore(self)
                     end
                 end
 
-                self:AddLine("Reckoning score " .. tostring(score ~= nil and score or "-"), sr, sg, sb, true)
+                self:AddLine("Kehet's Fellowship score " .. tostring(score ~= nil and score or "-"), sr, sg, sb, true)
 
                 if note and note ~= nil and note ~= "" then
                     self:AddLine("Note: " .. note)
