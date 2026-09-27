@@ -51,7 +51,7 @@ end
 
 -- Register events using AceEvent
 function Fellowship:OnEnable()
-    self:Print("Enabled")
+    self:Print("Enabled - Use /fellow list to open the known players window, /fellow or /fellowship to list all commands")
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdatePartyMembers")
     self:RegisterEvent("PARTY_LEADER_CHANGED", "UpdatePartyMembers")
     self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdatePartyMembers")
