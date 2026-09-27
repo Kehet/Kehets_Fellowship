@@ -130,22 +130,118 @@ function Fellowship:ProcessGroupUnit(unit, fullPlayerName, instanceID)
     info.class = info.class or classFileName
 end
 
--- Update the party members table when the group changes, but do not remove players who leave
-function Fellowship:UpdatePartyMembers()
-    local instanceID = GetCurrentInstanceID()
+-- Get the unit IDs of all group members
+local function GetGroupUnits()
+    local units = {}
     local numGroupMembers = GetNumGroupMembers()
-
-    local playerName, playerRealm = UnitName("player")
-    local fullPlayerName = GetFullPlayerName(playerName, playerRealm)
 
     if IsInRaid() then
         for i = 1, numGroupMembers do
-            self:ProcessGroupUnit("raid" .. i, fullPlayerName, instanceID)
+            table.insert(units, "raid" .. i)
         end
     elseif IsInGroup() then
         -- "party" units don't include the player themselves
         for i = 1, numGroupMembers - 1 do
-            self:ProcessGroupUnit("party" .. i, fullPlayerName, instanceID)
+            table.insert(units, "party" .. i)
         end
     end
+
+    return units
+end
+
+-- Tag for players who were removed from the group by a vote kick
+local VOTE_KICKED_TAG = "Vote-kicked"
+
+-- Seconds after a kick vote ends that the target can still leave the group and count as kicked
+local KICK_GRACE_SECONDS = 10
+
+-- Update the party members table when the group changes, but do not remove players who leave
+function Fellowship:UpdatePartyMembers()
+    local instanceID = GetCurrentInstanceID()
+
+    local playerName, playerRealm = UnitName("player")
+    local fullPlayerName = GetFullPlayerName(playerName, playerRealm)
+
+    for _, unit in ipairs(GetGroupUnits()) do
+        self:ProcessGroupUnit(unit, fullPlayerName, instanceID)
+    end
+
+    self:CheckPendingKick()
+end
+
+-- Find the full name of the group member a kick vote is against.
+-- The vote may give the name without a realm, so compare names only.
+local function FindKickTargetFullName(targetName)
+    local targetBaseName = string.lower(string.match(targetName, "^[^-]+"))
+
+    for _, unit in ipairs(GetGroupUnits()) do
+        local name, realm = UnitName(unit)
+        if name and not UnitIsUnit(unit, "player") and string.lower(name) == targetBaseName then
+            return GetFullPlayerName(name, realm)
+        end
+    end
+end
+
+-- Remember the target and reason of a kick vote, so they can be tagged if they leave the group
+function Fellowship:OnBootProposalUpdate()
+    local inProgress, _, _, targetName, _, _, _, reason = GetLFGBootProposal()
+
+    if inProgress and targetName then
+        local fullName = FindKickTargetFullName(targetName)
+        if fullName then
+            self.pendingKick = { fullName = fullName, reason = reason }
+        end
+    elseif self.pendingKick and not self.pendingKick.endedAt then
+        -- The vote is over. If it passed, the target leaves the group in the next roster update.
+        self.pendingKick.endedAt = GetTime()
+    end
+end
+
+-- Tag the target of a kick vote if they are no longer in the group
+function Fellowship:CheckPendingKick()
+    local kick = self.pendingKick
+    if not kick or not IsInGroup() then
+        return
+    end
+
+    -- The target is still in the group long after the vote ended, so the vote failed
+    if kick.endedAt and GetTime() - kick.endedAt > KICK_GRACE_SECONDS then
+        self.pendingKick = nil
+        return
+    end
+
+    for _, unit in ipairs(GetGroupUnits()) do
+        local name, realm = UnitName(unit)
+        if name and GetFullPlayerName(name, realm) == kick.fullName then
+            return
+        end
+    end
+
+    self.pendingKick = nil
+    self:MarkVoteKicked(kick.fullName, kick.reason)
+end
+
+-- Add the vote kick tag to a player and add the kick reason to their note
+function Fellowship:MarkVoteKicked(fullName, reason)
+    local info = self.db.factionrealm.players[fullName]
+    if not info then
+        return
+    end
+
+    info.tags = info.tags or {}
+    AddTagIfMissing(info.tags, VOTE_KICKED_TAG)
+
+    local message = ColorizeNameByClass(fullName, info.class) .. " was vote-kicked"
+
+    if reason and reason ~= "" then
+        if info.note and info.note ~= "" then
+            info.note = info.note .. " - " .. reason
+        else
+            info.note = reason
+        end
+        message = message .. ": " .. reason
+    end
+
+    self:Print(message)
+    self:RefreshPlayerList()
 end

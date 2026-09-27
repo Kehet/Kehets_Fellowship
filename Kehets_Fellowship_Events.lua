@@ -188,6 +188,9 @@ function Fellowship:OnGroupLeft()
     -- Clear the current party members table
     partyMembers = {}
 
+    -- A kick vote does not carry over to the next group
+    self.pendingKick = nil
+
     -- Show the popup with the players
     self:ShowPreviousGroupPopup()
 end
