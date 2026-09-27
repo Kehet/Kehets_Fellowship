@@ -14,6 +14,8 @@ When you leave a group, a window opens with every player from that group. For ea
 
 The window adds the role each player had in the group (Tank, Healer or DPS) to their tags, unless they already have that tag.
 
+When a player is removed from your group by a kick vote, Fellowship adds the `Vote-kicked` tag to them and adds the kick reason to their note.
+
 When you mouse over a known player, the tooltip shows their score, note and when you last saw them. Positive scores are green and negative scores are red.
 
 The player list is stored separately for each faction on each realm.

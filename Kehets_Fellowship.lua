@@ -58,6 +58,7 @@ function Fellowship:OnEnable()
     self:RegisterEvent("GROUP_JOINED", "UpdatePartyMembers")
     self:RegisterEvent("GROUP_FORMED", "UpdatePartyMembers")
     self:RegisterEvent("GROUP_LEFT", "OnGroupLeft")
+    self:RegisterEvent("LFG_BOOT_PROPOSAL_UPDATE", "OnBootProposalUpdate")
 end
 
 -- Slash command handler
