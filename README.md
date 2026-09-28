@@ -56,4 +56,4 @@ Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 
 ## License
 
-MIT. See `LICENSE`.
+Public domain (The Unlicense). See `LICENSE`.
