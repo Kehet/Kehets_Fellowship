@@ -213,7 +213,7 @@ function Fellowship:PopulateFakeData()
             lastSeen = "2024-10-05 12:00",
             count = 1,
             lastInstanceID = 1,
-            note = "\“Dad who left for cigarettes\” and only comes back to give an awkward pep talk before disappearing again",
+            note = "“Dad who left for cigarettes” and only comes back to give an awkward pep talk before disappearing again",
             class = "SHAMAN"
         }
     end
