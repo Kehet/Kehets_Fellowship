@@ -51,7 +51,7 @@ Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 
 ## Requirements
 
-- World of Warcraft: Mists of Pandaria Classic
+- World of Warcraft: Mists of Pandaria Classic or World of Warcraft: Forever
 - The [Ace3](https://www.curseforge.com/wow/addons/ace3) addon
 
 ## License

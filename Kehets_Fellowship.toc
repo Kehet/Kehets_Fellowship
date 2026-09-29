@@ -1,4 +1,4 @@
-## Interface: 50500
+## Interface: 50504, 16001
 ## Title: |cFF009900Kehet's|r Fellowship
 ## Notes: Remember the great players you meet in groups and get notified when they join you again
 ## Author: Kehet
