@@ -11,6 +11,7 @@ globals = {
     "AddTagIfMissing",
     "ColorizeNameByClass",
     "Fellowship",
+    "FormatTimeAgo",
     "GetCurrentInstanceID",
     "GetFullPlayerName",
     "GetRoleTag",

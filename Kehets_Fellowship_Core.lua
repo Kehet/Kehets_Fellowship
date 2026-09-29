@@ -28,6 +28,57 @@ function GetTimestamp()
     return date("%Y-%m-%d %H:%M:%S")
 end
 
+-- Convert a lastSeen value to a unix timestamp, or nil if it can't be read.
+-- New entries hold a "YYYY-MM-DD HH:MM:SS" string, older ones a unix timestamp.
+local function LastSeenToTime(lastSeen)
+    if type(lastSeen) == "number" then
+        return lastSeen > 0 and lastSeen or nil
+    end
+    if type(lastSeen) ~= "string" then
+        return nil
+    end
+    local year, month, day, hour, min, sec = lastSeen:match("^(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)$")
+    if not year then
+        return nil
+    end
+    return time({
+        year = tonumber(year),
+        month = tonumber(month),
+        day = tonumber(day),
+        hour = tonumber(hour),
+        min = tonumber(min),
+        sec = tonumber(sec),
+    })
+end
+
+-- Format a count with its unit, e.g. "1 day ago" or "3 days ago"
+local function Ago(count, unit)
+    return count .. " " .. unit .. (count == 1 and "" or "s") .. " ago"
+end
+
+-- Describe how long ago a lastSeen value was, e.g. "3 days ago".
+-- Returns the value as text if it can't be read.
+function FormatTimeAgo(lastSeen)
+    local timestamp = LastSeenToTime(lastSeen)
+    if not timestamp then
+        return tostring(lastSeen or "Unknown")
+    end
+
+    local diff = math.max(0, time() - timestamp)
+    if diff < 60 then
+        return "just now"
+    elseif diff < 3600 then
+        return Ago(math.floor(diff / 60), "minute")
+    elseif diff < 86400 then
+        return Ago(math.floor(diff / 3600), "hour")
+    elseif diff < 86400 * 30 then
+        return Ago(math.floor(diff / 86400), "day")
+    elseif diff < 86400 * 365 then
+        return Ago(math.floor(diff / (86400 * 30)), "month")
+    end
+    return Ago(math.floor(diff / (86400 * 365)), "year")
+end
+
 -- Tag names for the group roles returned by UnitGroupRolesAssigned
 local roleTags = {
     TANK = "Tank",
@@ -71,7 +122,7 @@ function Fellowship:AnnounceKnownPlayer(fullName, info)
         table.insert(details, info.note)
     end
     if info.lastSeen then
-        table.insert(details, "last grouped " .. info.lastSeen)
+        table.insert(details, "last grouped " .. FormatTimeAgo(info.lastSeen))
     end
 
     local suffix = #details > 0 and (" (" .. table.concat(details, " - ") .. ")") or ""
