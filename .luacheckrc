@@ -22,6 +22,8 @@ globals = {
 
 -- WoW API, FrameXML and libraries
 read_globals = {
+    "C_BattleNet",
+    "C_FriendList",
     "CreateFrame",
     "date",
     "format",
@@ -35,12 +37,15 @@ read_globals = {
     "IsInRaid",
     "LibStub",
     "LOCALIZED_CLASS_NAMES_MALE",
+    "PlaySoundFile",
     "RAID_CLASS_COLORS",
     "strtrim",
     "time",
     "UIParent",
     "UnitClass",
     "UnitGroupRolesAssigned",
+    "UnitGUID",
+    "UnitIsInMyGuild",
     "UnitIsPlayer",
     "UnitIsUnit",
     "UnitName",

@@ -10,6 +10,12 @@ local defaultSavedVariables = {
         minimap = {
             hide = false,
         },
+        -- Sound played when a rated player joins the group
+        sound = {
+            enabled = true,
+            guild = true,
+            friends = true,
+        },
     },
 }
 
@@ -81,6 +87,8 @@ function Fellowship:HandleSlashCommand(input)
     elseif command == "toggleicon" then
         self:ToggleMinimapIcon()
         self:Print("Toggled minimap icon.")
+    elseif command == "sound" then
+        self:ToggleJoinSound(playerName)
     elseif command == "add" then
         self:AddScore(playerName, score, note, tags)
     elseif command == "remove" or command == "delete" then
@@ -93,6 +101,9 @@ function Fellowship:HandleSlashCommand(input)
         self:Print(" '/fellow reopen' to reopen the previous group popup")
         self:Print(" '/fellow test' to test with fake data")
         self:Print(" '/fellow toggleicon' to show/hide the minimap icon")
+        self:Print(" '/fellow sound' to turn the rated player join sound on/off")
+        self:Print(" '/fellow sound guild' to turn the join sound on/off for guild members")
+        self:Print(" '/fellow sound friends' to turn the join sound on/off for friends")
         self:Print(" '/fellow add <playerName> <score> [note [tags]]' - tags are comma-separated")
         self:Print(" '/fellow remove <playerName>")
     end

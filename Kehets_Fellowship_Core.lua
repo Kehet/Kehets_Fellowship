@@ -134,6 +134,71 @@ function Fellowship:AnnounceKnownPlayer(fullName, info)
     end
 end
 
+-- Check if a unit is on the character friend list or the Battle.net friend list
+local function IsUnitFriend(unit)
+    local guid = UnitGUID(unit)
+    if not guid then
+        return false
+    end
+    if C_FriendList.IsFriend(guid) then
+        return true
+    end
+    if C_BattleNet and C_BattleNet.GetAccountInfoByGUID then
+        local accountInfo = C_BattleNet.GetAccountInfoByGUID(guid)
+        return accountInfo ~= nil and accountInfo.isFriend == true
+    end
+    return false
+end
+
+-- File ID of sound/creature/goblinmalegruffnpc/goblinmalegruffnpcgreeting06.ogg
+local GOOD_PLAYER_SOUND_FILE_ID = 550773
+
+-- File ID of sound/creature/nightelfmalestandardnpc/nightelfmalestandardnpcpissed01.ogg
+local BAD_PLAYER_SOUND_FILE_ID = 556575
+
+-- Minimum seconds before the same join sound plays again
+local JOIN_SOUND_COOLDOWN_SECONDS = 5
+
+-- Sound file IDs waiting to be played, and when each sound was last played
+local pendingJoinSounds = {}
+local lastJoinSoundAt = {}
+
+-- Queue a sound when a rated player (score other than 0) joins the group,
+-- unless the sound is turned off for everyone, guild members or friends.
+-- The sound is played by FlushJoinSound after the whole roster is processed.
+function Fellowship:QueueJoinSound(unit, info)
+    local settings = self.db.profile.sound
+
+    if not settings.enabled or not info.score or info.score == 0 then
+        return
+    end
+    if not settings.guild and UnitIsInMyGuild(unit) then
+        return
+    end
+    if not settings.friends and IsUnitFriend(unit) then
+        return
+    end
+
+    -- Good players get a goblin greeting, bad players an annoyed night elf
+    pendingJoinSounds[info.score > 0 and GOOD_PLAYER_SOUND_FILE_ID or BAD_PLAYER_SOUND_FILE_ID] = true
+end
+
+-- Play the queued join sounds. Each sound plays at most once per cooldown, so
+-- several good players give one greeting, and good and bad players give both sounds.
+function Fellowship:FlushJoinSound()
+    local now = GetTime()
+
+    for sound in pairs(pendingJoinSounds) do
+        pendingJoinSounds[sound] = nil
+
+        local lastPlayedAt = lastJoinSoundAt[sound]
+        if not lastPlayedAt or now - lastPlayedAt >= JOIN_SOUND_COOLDOWN_SECONDS then
+            lastJoinSoundAt[sound] = now
+            PlaySoundFile(sound, "Master")
+        end
+    end
+end
+
 -- Record one group member and announce them the first time they appear in this group
 function Fellowship:ProcessGroupUnit(unit, fullPlayerName, instanceID)
     local name, realm = UnitName(unit)
@@ -169,6 +234,7 @@ function Fellowship:ProcessGroupUnit(unit, fullPlayerName, instanceID)
 
     if isNewToGroup then
         self:AnnounceKnownPlayer(fullName, info)
+        self:QueueJoinSound(unit, info)
     end
 
     -- Count each instance run together once
@@ -216,6 +282,8 @@ function Fellowship:UpdatePartyMembers()
     for _, unit in ipairs(GetGroupUnits()) do
         self:ProcessGroupUnit(unit, fullPlayerName, instanceID)
     end
+
+    self:FlushJoinSound()
 
     self:CheckPendingKick()
 end
