@@ -6,7 +6,7 @@ A World of Warcraft addon that remembers the great players you meet in groups. H
 
 Fellowship remembers every player you group with, in parties and in raids. When a known player joins your group, chat shows a line with their score, note and when you last grouped with them. Players with a positive score are announced as "Good player joined" in green, so you notice them right away.
 
-When a rated player (a score other than 0) joins your group, Fellowship also plays a sound: a goblin greeting for a positive score and an annoyed night elf voice line for a negative score. You can turn the sound off for everyone, for guild members only, or for players on your friend list only. See the `/fellow sound` commands below.
+When a rated player (a score other than 0) joins your group, Fellowship also plays a sound: a goblin greeting for a positive score and an annoyed night elf voice line for a negative score. Each sound plays at most once every 5 seconds, so joining a group with several good players gives one greeting. If that group has both good and bad players, both sounds play at the same time. You can turn the sound off for everyone, for guild members only, or for players on your friend list only. See the `/fellow sound` commands below.
 
 When you leave a group, a window opens with every player from that group. For each player you can:
 
