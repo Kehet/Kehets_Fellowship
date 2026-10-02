@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.2.0...2.3.0) (2026-10-02)
+
+
+### Features
+
+* add a settings page for the join sound and minimap button ([#20](https://github.com/Kehet/Kehets_Fellowship/issues/20)) ([20dd90d](https://github.com/Kehet/Kehets_Fellowship/commit/20dd90de18a3f20a79dd719bd348cabb04200c93))
+* play a sound when a rated player joins the group ([#19](https://github.com/Kehet/Kehets_Fellowship/issues/19)) ([ad6eba3](https://github.com/Kehet/Kehets_Fellowship/commit/ad6eba302a0a82a4333f55877cdeb987eea20be9))
+* show last grouped time as relative time in join message ([#17](https://github.com/Kehet/Kehets_Fellowship/issues/17)) ([2946a01](https://github.com/Kehet/Kehets_Fellowship/commit/2946a0111684ac10690e190155dd52089747b5e3))
+
 ## [2.2.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.1.0...2.2.0) (2026-09-27)
 
 
