@@ -272,6 +272,7 @@ function Fellowship:ToggleMinimapIcon()
     else
         LibStub("LibDBIcon-1.0"):Show("Kehet's Fellowship")
     end
+    self:RefreshOptions()
 end
 
 -- Turn the rated player join sound on or off, for everyone or for one group of players
@@ -291,6 +292,7 @@ function Fellowship:ToggleJoinSound(target)
     end
 
     settings[key] = not settings[key]
+    self:RefreshOptions()
     self:Print(label .. " is now " .. (settings[key] and "|cFF33FF33on|r" or "|cFFFF3333off|r") .. ".")
 
     if key ~= "enabled" and not settings.enabled then

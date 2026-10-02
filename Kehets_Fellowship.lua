@@ -37,6 +37,7 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fello
         tooltip:AddLine("Kehet's Fellowship")
         tooltip:AddLine("Left-click to open Kehet's Fellowship.")
         tooltip:AddLine("Right-click to list all known players.")
+        tooltip:AddLine("Use /fellow config to open the settings.")
     end,
 })
 
@@ -49,6 +50,8 @@ function Fellowship:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("FellowshipDB", defaultSavedVariables, true)
 
     icon:Register("Kehet's Fellowship", ldb, self.db.profile.minimap)
+
+    self:RegisterOptions()
 
     -- Register slash commands
     self:RegisterChatCommand("fellowship", "HandleSlashCommand")
@@ -84,6 +87,8 @@ function Fellowship:HandleSlashCommand(input)
         -- Populate fake data and show the score screen
         self:PopulateFakeData()
         self:ShowPreviousGroupPopup()
+    elseif command == "config" or command == "options" or command == "settings" then
+        self:OpenOptions()
     elseif command == "toggleicon" then
         self:ToggleMinimapIcon()
         self:Print("Toggled minimap icon.")
@@ -100,6 +105,7 @@ function Fellowship:HandleSlashCommand(input)
         self:Print(" '/fellow reset' to clear all known players")
         self:Print(" '/fellow reopen' to reopen the previous group popup")
         self:Print(" '/fellow test' to test with fake data")
+        self:Print(" '/fellow config' to open the settings")
         self:Print(" '/fellow toggleicon' to show/hide the minimap icon")
         self:Print(" '/fellow sound' to turn the rated player join sound on/off")
         self:Print(" '/fellow sound guild' to turn the join sound on/off for guild members")

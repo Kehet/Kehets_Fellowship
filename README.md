@@ -6,7 +6,7 @@ A World of Warcraft addon that remembers the great players you meet in groups. H
 
 Fellowship remembers every player you group with, in parties and in raids. When a known player joins your group, chat shows a line with their score, note and when you last grouped with them. Players with a positive score are announced as "Good player joined" in green, so you notice them right away.
 
-When a rated player (a score other than 0) joins your group, Fellowship also plays a sound: a goblin greeting for a positive score and an annoyed night elf voice line for a negative score. Each sound plays at most once every 5 seconds, so joining a group with several good players gives one greeting. If that group has both good and bad players, both sounds play at the same time. You can turn the sound off for everyone, for guild members only, or for players on your friend list only. See the `/fellow sound` commands below.
+When a rated player (a score other than 0) joins your group, Fellowship also plays a sound: a goblin greeting for a positive score and an annoyed night elf voice line for a negative score. Each sound plays at most once every 5 seconds, so joining a group with several good players gives one greeting. If that group has both good and bad players, both sounds play at the same time. You can turn the sound off for everyone, for guild members only, or for players on your friend list only. Change this on the settings page or with the `/fellow sound` commands below.
 
 When you leave a group, a window opens with every player from that group. For each player you can:
 
@@ -25,6 +25,15 @@ The player list is stored separately for each faction on each realm.
 ## Minimap button
 
 Left-click the minimap button to open the rating window for your previous group again. Right-click it to open the player list.
+
+## Settings
+
+Open the settings page from the game menu under Options, AddOns, Kehet's Fellowship, or use `/fellow config` to open it in its own window. The page has these settings:
+
+- Play a sound when a rated player joins.
+- Play the sound for guild members.
+- Play the sound for friends.
+- Show the minimap button.
 
 ## Player list
 
@@ -48,6 +57,7 @@ Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 | `/fellow add <player> <score> [note [tags]]` | Set a score, and optionally a note and comma-separated tags |
 | `/fellow remove <player>` | Remove a player from the list |
 | `/fellow reset` | Remove all known players, after a confirmation |
+| `/fellow config` | Open the settings window |
 | `/fellow toggleicon` | Show or hide the minimap button |
 | `/fellow sound` | Turn the rated player join sound on or off |
 | `/fellow sound guild` | Turn the join sound on or off for guild members |
