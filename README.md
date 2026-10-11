@@ -37,6 +37,13 @@ Open the settings page from the game menu under Options, AddOns, Kehet's Fellows
 - Play the sound for friends.
 - Show the minimap button.
 
+The Messages group has the login message, the message for a known player who joins and the vote kick message. Each message has these settings:
+
+- Show: turn the message on or off.
+- Show in: one or more of the chat windows, the error frame, the raid warning frame, the boss emote frame and the floating combat text. Parrot, MikScrollingBattleText, BigWigs and DBM outputs are listed while those addons are loaded.
+
+Mute all messages turns all of them off. Answers to slash commands always print.
+
 ## Player list
 
 The player list window shows every known player in a table with their class, score, how many times you grouped, when you last grouped, tags and note.

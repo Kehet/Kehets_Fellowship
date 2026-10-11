@@ -4,7 +4,7 @@
 ## Author: Kehet
 ## Version: @project-version@
 ## SavedVariables: FellowshipDB
-## OptionalDeps: Ace3
+## OptionalDeps: Ace3, LibKehetsVerbosity-1.0
 
 embeds.xml
 Kehets_Fellowship.lua
