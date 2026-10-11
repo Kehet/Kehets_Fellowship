@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.4.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.3.0...2.4.0) (2026-10-11)
+
+
+### Features
+
+* add message settings for join, vote kick and login messages ([#22](https://github.com/Kehet/Kehets_Fellowship/issues/22)) ([bc67e4d](https://github.com/Kehet/Kehets_Fellowship/commit/bc67e4dc1dff7a3bc43cce1b06acb83386d2368d))
+
+
+### Bug Fixes
+
+* hold join messages and sounds until the loading screen ends ([#21](https://github.com/Kehet/Kehets_Fellowship/issues/21)) ([6ff5832](https://github.com/Kehet/Kehets_Fellowship/commit/6ff58327d02ce6d60a00636ab7624b128791bd3a))
+
 ## [2.3.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.2.0...2.3.0) (2026-10-02)
 
 
