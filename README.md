@@ -8,6 +8,8 @@ Fellowship remembers every player you group with, in parties and in raids. When 
 
 When a rated player (a score other than 0) joins your group, Fellowship also plays a sound: a goblin greeting for a positive score and an annoyed night elf voice line for a negative score. Each sound plays at most once every 5 seconds, so joining a group with several good players gives one greeting. If that group has both good and bad players, both sounds play at the same time. You can turn the sound off for everyone, for guild members only, or for players on your friend list only. Change this on the settings page or with the `/fellow sound` commands below.
 
+A loading screen hides chat and cuts off sounds. When you join a group through the Dungeon Finder, Fellowship holds the chat lines and the sound until about 2 seconds after the loading screen ends.
+
 When you leave a group, a window opens with every player from that group. For each player you can:
 
 - Give a score from -2 to 2. A positive score marks them as a good player.

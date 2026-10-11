@@ -68,6 +68,9 @@ function Fellowship:OnEnable()
     self:RegisterEvent("GROUP_FORMED", "UpdatePartyMembers")
     self:RegisterEvent("GROUP_LEFT", "OnGroupLeft")
     self:RegisterEvent("LFG_BOOT_PROPOSAL_UPDATE", "OnBootProposalUpdate")
+    self:RegisterEvent("LFG_PROPOSAL_SUCCEEDED", "OnLFGProposalSucceeded")
+    self:RegisterEvent("LOADING_SCREEN_ENABLED", "OnLoadingScreenEnabled")
+    self:RegisterEvent("LOADING_SCREEN_DISABLED", "OnLoadingScreenDisabled")
 end
 
 -- Slash command handler
