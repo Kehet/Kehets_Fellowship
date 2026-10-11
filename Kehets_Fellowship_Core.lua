@@ -109,8 +109,23 @@ function GetCurrentInstanceID()
     return instanceID
 end
 
--- Announce a known player in chat when they join the group. Players with a
+-- Seconds to wait after a loading screen ends before the held join messages and sounds are shown
+local ANNOUNCE_DELAY_AFTER_LOADING_SECONDS = 2
+
+-- Seconds to wait for the teleport after a Dungeon Finder group forms before giving up on it
+local LFG_TELEPORT_TIMEOUT_SECONDS = 15
+
+-- Join messages waiting to be printed
+local pendingJoinMessages = {}
+
+-- A loading screen hides chat and cuts off sounds, so join messages and sounds are held
+-- while one is shown, and while the teleport of a new Dungeon Finder group is on its way
+local isLoadingScreenShown = false
+local isAwaitingLFGTeleport = false
+
+-- Queue a known player's chat line for when they join the group. Players with a
 -- positive score get a highlighted line, everyone else a plain reminder.
+-- The line is printed by FlushJoinAnnouncements after the whole roster is processed.
 function Fellowship:AnnounceKnownPlayer(fullName, info)
     local name = ColorizeNameByClass(fullName, info.class)
     local details = {}
@@ -128,9 +143,9 @@ function Fellowship:AnnounceKnownPlayer(fullName, info)
     local suffix = #details > 0 and (" (" .. table.concat(details, " - ") .. ")") or ""
 
     if info.score and info.score > 0 then
-        self:Print("|cFF33FF33Good player joined:|r " .. name .. suffix)
+        table.insert(pendingJoinMessages, "|cFF33FF33Good player joined:|r " .. name .. suffix)
     else
-        self:Print("You have grouped with " .. name .. " before" .. suffix)
+        table.insert(pendingJoinMessages, "You have grouped with " .. name .. " before" .. suffix)
     end
 end
 
@@ -165,7 +180,7 @@ local lastJoinSoundAt = {}
 
 -- Queue a sound when a rated player (score other than 0) joins the group,
 -- unless the sound is turned off for everyone, guild members or friends.
--- The sound is played by FlushJoinSound after the whole roster is processed.
+-- The sound is played by FlushJoinAnnouncements after the whole roster is processed.
 function Fellowship:QueueJoinSound(unit, info)
     local settings = self.db.profile.sound
 
@@ -197,6 +212,49 @@ function Fellowship:FlushJoinSound()
             PlaySoundFile(sound, "Master")
         end
     end
+end
+
+-- Print the queued join messages and play the queued join sounds, unless they are held.
+-- Held messages and sounds stay queued until this is called again.
+function Fellowship:FlushJoinAnnouncements()
+    if isLoadingScreenShown or isAwaitingLFGTeleport then
+        return
+    end
+
+    for _, message in ipairs(pendingJoinMessages) do
+        self:Print(message)
+    end
+    pendingJoinMessages = {}
+
+    self:FlushJoinSound()
+end
+
+-- A Dungeon Finder group formed, so a teleport and its loading screen come next.
+-- Hold the join messages and sounds until the loading screen is over.
+function Fellowship:OnLFGProposalSucceeded()
+    isAwaitingLFGTeleport = true
+
+    -- Stop waiting if no loading screen comes, e.g. when already inside the dungeon
+    C_Timer.After(LFG_TELEPORT_TIMEOUT_SECONDS, function()
+        if isAwaitingLFGTeleport then
+            isAwaitingLFGTeleport = false
+            self:FlushJoinAnnouncements()
+        end
+    end)
+end
+
+function Fellowship:OnLoadingScreenEnabled()
+    isLoadingScreenShown = true
+end
+
+-- Show the held join messages and sounds shortly after the loading screen ends
+function Fellowship:OnLoadingScreenDisabled()
+    isLoadingScreenShown = false
+    isAwaitingLFGTeleport = false
+
+    C_Timer.After(ANNOUNCE_DELAY_AFTER_LOADING_SECONDS, function()
+        self:FlushJoinAnnouncements()
+    end)
 end
 
 -- Record one group member and announce them the first time they appear in this group
@@ -283,7 +341,7 @@ function Fellowship:UpdatePartyMembers()
         self:ProcessGroupUnit(unit, fullPlayerName, instanceID)
     end
 
-    self:FlushJoinSound()
+    self:FlushJoinAnnouncements()
 
     self:CheckPendingKick()
 end

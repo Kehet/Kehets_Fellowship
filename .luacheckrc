@@ -24,6 +24,7 @@ globals = {
 read_globals = {
     "C_BattleNet",
     "C_FriendList",
+    "C_Timer",
     "CreateFrame",
     "date",
     "format",
