@@ -1,5 +1,24 @@
 -- Initialize Ace3 with AceConsole for slash commands, AceEvent for event handling, and AceDB for saved variables
-Fellowship = LibStub("AceAddon-3.0"):NewAddon("Kehet's Fellowship", "AceConsole-3.0", "AceEvent-3.0")
+Fellowship = LibStub("AceAddon-3.0"):NewAddon("Kehet's Fellowship", "AceConsole-3.0", "AceEvent-3.0", "LibKehetsVerbosity-1.0")
+
+-- Messages the player can turn off or move in the Messages settings
+Fellowship:RegisterMessageTypes({
+    banner = {
+        name = "Login message",
+        desc = "The line that says the addon is enabled.",
+        order = 1,
+    },
+    join = {
+        name = "Known player joined",
+        desc = "The line that says a player you grouped with before joined your group.",
+        order = 2,
+    },
+    voteKick = {
+        name = "Vote kick",
+        desc = "The line that says a player was vote-kicked.",
+        order = 3,
+    },
+})
 
 -- Default structure for saved variables (faction-realm specific)
 local defaultSavedVariables = {
@@ -60,7 +79,7 @@ end
 
 -- Register events using AceEvent
 function Fellowship:OnEnable()
-    self:Print("Enabled - Use /fellow list to open the known players window, /fellow or /fellowship to list all commands")
+    self:Notify("banner", "Enabled - Use /fellow list to open the known players window, /fellow or /fellowship to list all commands")
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdatePartyMembers")
     self:RegisterEvent("PARTY_LEADER_CHANGED", "UpdatePartyMembers")
     self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdatePartyMembers")

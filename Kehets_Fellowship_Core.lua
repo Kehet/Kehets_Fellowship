@@ -222,7 +222,7 @@ function Fellowship:FlushJoinAnnouncements()
     end
 
     for _, message in ipairs(pendingJoinMessages) do
-        self:Print(message)
+        self:Notify("join", message)
     end
     pendingJoinMessages = {}
 
@@ -419,6 +419,6 @@ function Fellowship:MarkVoteKicked(fullName, reason)
         message = message .. ": " .. reason
     end
 
-    self:Print(message)
+    self:Notify("voteKick", message)
     self:RefreshPlayerList()
 end

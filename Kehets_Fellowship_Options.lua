@@ -85,6 +85,10 @@ local options = {
     },
 }
 
+options.args.messages = Fellowship:GetMessageOptions()
+options.args.messages.inline = true
+options.args.messages.order = 3
+
 -- Register the settings page in the game's AddOns settings list
 function Fellowship:RegisterOptions()
     LibStub("AceConfig-3.0"):RegisterOptionsTable(APP_NAME, options)
