@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.4.0...2.5.0) (2026-10-17)
+
+
+### Features
+
+* support Classic Era (interface 11509) ([#25](https://github.com/Kehet/Kehets_Fellowship/issues/25)) ([42277a7](https://github.com/Kehet/Kehets_Fellowship/commit/42277a72ae8515ea9ab598e9a6e0f4bbbcd61e44))
+
 ## [2.4.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.3.0...2.4.0) (2026-10-11)
 
 
