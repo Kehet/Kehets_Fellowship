@@ -1,10 +1,10 @@
 # Kehet's Fellowship
 
-A World of Warcraft addon that remembers the great players you meet in groups. Had a healer who kept everyone alive, or a tank who waited for the slow pull? Give them a good score, and Fellowship tells you when they join your group again.
+A World of Warcraft addon that keeps a record of the players you group with. Give them a score, a note and tags, and Fellowship tells you when they join your group again.
 
 ## How it works
 
-Fellowship remembers every player you group with, in parties and in raids. When a known player joins your group, chat shows a line with their score, note and when you last grouped with them. Players with a positive score are announced as "Good player joined" in green, so you notice them right away.
+Fellowship records every player you group with, in parties and in raids. When a known player joins your group, chat shows a line with their score, note and when you last grouped with them. Players with a positive score are announced as "Good player joined" in green.
 
 When a rated player (a score other than 0) joins your group, Fellowship also plays a sound: a goblin greeting for a positive score and an annoyed night elf voice line for a negative score. Each sound plays at most once every 5 seconds, so joining a group with several good players gives one greeting. If that group has both good and bad players, both sounds play at the same time. You can turn the sound off for everyone, for guild members only, or for players on your friend list only. Change this on the settings page or with the `/fellow sound` commands below.
 
