@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.6.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.5.1...2.6.0) (2026-11-04)
+
+
+### Features
+
+* toggle the last group window from the minimap icon ([#31](https://github.com/Kehet/Kehets_Fellowship/issues/31)) ([85ac32e](https://github.com/Kehet/Kehets_Fellowship/commit/85ac32eaa34af05b1f9f1f5ce5819ccc3d14b552))
+
+
+### Bug Fixes
+
+* declare Mists of Pandaria Classic interface 50504 ([#33](https://github.com/Kehet/Kehets_Fellowship/issues/33)) ([c6ed418](https://github.com/Kehet/Kehets_Fellowship/commit/c6ed4186af5bbd8c5bf405fe79266218c438a7f5))
+* upload releases to Wago ([#35](https://github.com/Kehet/Kehets_Fellowship/issues/35)) ([9d945a9](https://github.com/Kehet/Kehets_Fellowship/commit/9d945a98afc463d7e18648c2c7353910d1712244))
+
 ## [2.5.1](https://github.com/Kehet/Kehets_Fellowship/compare/2.5.0...2.5.1) (2026-11-04)
 
 
