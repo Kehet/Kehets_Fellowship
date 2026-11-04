@@ -9,10 +9,19 @@ function Fellowship:ShowPreviousGroupPopup()
         return
     end
 
+    -- Replace an already open popup instead of stacking a second one on top of it
+    if self.previousGroupPopup then
+        self.previousGroupPopup:Hide()
+    end
+
     -- Create a frame for the AceGUI popup (increased width)
     local frame = AceGUI:Create("Frame")
     frame:SetTitle("Remember Players from Your Last Group")
-    frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
+    frame:SetCallback("OnClose", function(widget)
+        AceGUI:Release(widget)
+        self.previousGroupPopup = nil
+    end)
+    self.previousGroupPopup = frame
     frame:SetLayout("Flow")
     frame:SetWidth(500)  -- Increased width to prevent wrapping
     frame:SetHeight(300)
@@ -149,4 +158,13 @@ function Fellowship:ShowPreviousGroupPopup()
 
     -- Show the frame
     frame:Show()
+end
+
+-- Close the previous group popup if it is open, otherwise show it
+function Fellowship:TogglePreviousGroupPopup()
+    if self.previousGroupPopup then
+        self.previousGroupPopup:Hide()
+    else
+        self:ShowPreviousGroupPopup()
+    end
 end

@@ -45,16 +45,15 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fello
     icon = "Interface\\Icons\\inv_hammer_16",
     OnClick = function(self, button)
         if button == "LeftButton" then
-            -- Open the GroupScore player tracking screen or other main functionality
-            -- Fellowship:Print("Opening Fellowship...")
-            Fellowship:ShowPreviousGroupPopup() -- Example, replace with your main functionality
+            -- Open the previous group popup, or close it if it is already open
+            Fellowship:TogglePreviousGroupPopup()
         elseif button == "RightButton" then
             Fellowship:ShowPlayerList()
         end
     end,
     OnTooltipShow = function(tooltip)
         tooltip:AddLine("Kehet's Fellowship")
-        tooltip:AddLine("Left-click to open Kehet's Fellowship.")
+        tooltip:AddLine("Left-click to open or close the last group window.")
         tooltip:AddLine("Right-click to list all known players.")
         tooltip:AddLine("Use /fellow config to open the settings.")
     end,
