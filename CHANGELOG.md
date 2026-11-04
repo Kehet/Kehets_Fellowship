@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/Kehet/Kehets_Fellowship/compare/2.5.0...2.5.1) (2026-11-04)
+
+
+### Miscellaneous Chores
+
+* release 2.5.1 ([#29](https://github.com/Kehet/Kehets_Fellowship/issues/29)) ([28001ee](https://github.com/Kehet/Kehets_Fellowship/commit/28001ee3f481eddbb3d4e7fbf01485c145d2ff4d))
+
 ## [2.5.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.4.0...2.5.0) (2026-10-17)
 
 
