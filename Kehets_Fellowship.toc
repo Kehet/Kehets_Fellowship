@@ -1,4 +1,4 @@
-## Interface: 50500, 11509
+## Interface: 50504, 11509
 ## Title: |cFF009900Kehet's|r Fellowship
 ## Notes: Rate the players you group with and see their score when they join you again
 ## Author: Kehet
