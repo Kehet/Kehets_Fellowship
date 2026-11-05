@@ -41,5 +41,13 @@ local function AddPlayerScore(self)
     end
 end
 
--- Hook the GameTooltip
-GameTooltip:HookScript("OnTooltipSetUnit", AddPlayerScore)
+-- WoW: Forever has no OnTooltipSetUnit script, so its unit tooltips are hooked through TooltipDataProcessor
+if TooltipDataProcessor then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tooltip)
+        if tooltip == GameTooltip then
+            AddPlayerScore(tooltip)
+        end
+    end)
+else
+    GameTooltip:HookScript("OnTooltipSetUnit", AddPlayerScore)
+end
