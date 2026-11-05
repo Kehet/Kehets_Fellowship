@@ -259,6 +259,11 @@ end
 
 -- Record one group member and announce them the first time they appear in this group
 function Fellowship:ProcessGroupUnit(unit, fullPlayerName, instanceID)
+    -- Names alone do not find the player in WoW: Forever, where the player's own group unit has no realm
+    if UnitIsUnit(unit, "player") then
+        return
+    end
+
     local name, realm = UnitName(unit)
     if not name then
         return

@@ -22,11 +22,14 @@ globals = {
 
 -- WoW API, FrameXML and libraries
 read_globals = {
+    "issecretvalue",
+    "UnitExists",
     "C_BattleNet",
     "C_FriendList",
     "C_Timer",
     "CreateFrame",
     "date",
+    "Enum",
     "format",
     "GameTooltip",
     "GetInstanceInfo",
@@ -42,6 +45,7 @@ read_globals = {
     "RAID_CLASS_COLORS",
     "strtrim",
     "time",
+    "TooltipDataProcessor",
     "UIParent",
     "UnitClass",
     "UnitGroupRolesAssigned",
