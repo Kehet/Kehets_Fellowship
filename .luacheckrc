@@ -22,6 +22,8 @@ globals = {
 
 -- WoW API, FrameXML and libraries
 read_globals = {
+    "issecretvalue",
+    "UnitExists",
     "C_BattleNet",
     "C_FriendList",
     "C_Timer",

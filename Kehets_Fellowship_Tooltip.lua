@@ -1,11 +1,36 @@
 -- PlayerScoreAddon.lua
 
-local function AddPlayerScore(self)
-    local _, unit = self:GetUnit()
+-- WoW: Forever hands out secret values that addons cannot compare, and has no issecretvalue on the other clients
+local function IsSecret(value)
+    return issecretvalue ~= nil and issecretvalue(value)
+end
 
-    if unit and UnitIsPlayer(unit) then
+-- Returns the unit the tooltip shows, or nil when the client keeps it secret
+local function GetTooltipUnit(tooltip)
+    local _, unit = tooltip:GetUnit()
+    if unit and not IsSecret(unit) then
+        return unit
+    end
+    -- The world cursor tooltip is the mouseover unit, and a literal token is never secret
+    if UnitExists("mouseover") then
+        return "mouseover"
+    end
+    return nil
+end
+
+local function AddPlayerScore(self)
+    local unit = GetTooltipUnit(self)
+    if not unit then
+        return
+    end
+
+    local isPlayer = UnitIsPlayer(unit)
+    if not IsSecret(isPlayer) and isPlayer then
 
         local playerName, playerRealm = GetUnitName(unit, true)
+        if IsSecret(playerName) or IsSecret(playerRealm) then
+            return
+        end
         local fullName = GetFullPlayerName(playerName, playerRealm)
 
 
