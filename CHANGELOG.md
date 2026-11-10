@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.6.0...2.7.0) (2026-11-10)
+
+
+### Features
+
+* load in World of Warcraft: Forever ([#37](https://github.com/Kehet/Kehets_Fellowship/issues/37)) ([bf44296](https://github.com/Kehet/Kehets_Fellowship/commit/bf44296f1168e7af788fe38aee89c664075729ae))
+
 ## [2.6.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.5.1...2.6.0) (2026-11-04)
 
 
