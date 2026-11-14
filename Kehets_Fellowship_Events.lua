@@ -107,77 +107,40 @@ function Fellowship:RemoveScore(playerName)
     self:RefreshPlayerList()
 end
 
-function Fellowship:ShowResetConfirmation()
-    local AceGUI = LibStub("AceGUI-3.0")
-
-    -- Count total entries in database
+local function CountPlayers()
     local totalEntries = 0
-    for _ in pairs(self.db.factionrealm.players) do
+    for _ in pairs(Fellowship.db.factionrealm.players) do
         totalEntries = totalEntries + 1
     end
+    return totalEntries
+end
 
-    -- Create confirmation frame
-    local frame = AceGUI:Create("Frame")
-    frame:SetTitle("Reset Database Confirmation")
-    frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
-    frame:SetLayout("Flow")
-    frame:SetWidth(400)
-    frame:SetHeight(200)
+StaticPopupDialogs["KEHETS_FELLOWSHIP_RESET"] = {
+    text = "|cFFFF0000WARNING:|r You are about to reset the entire player database!\n\n"
+        .. "This will permanently delete %d player entries from your database.\n\n"
+        .. "Are you sure you want to continue?",
+    button1 = "|cFFFF0000Yes, Reset All|r",
+    button2 = "Cancel",
+    OnAccept = function()
+        local totalEntries = CountPlayers()
+        wipe(Fellowship.db.factionrealm.players)
+        Fellowship:Print("All " .. totalEntries .. " known players have been reset.")
+        Fellowship:RefreshPlayerList()
+    end,
+    OnCancel = function(_, _, reason)
+        if reason == "clicked" then
+            Fellowship:Print("Reset operation cancelled.")
+        end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    showAlert = true,
+    preferredIndex = 3,
+}
 
-    -- Warning message
-    local warningLabel = AceGUI:Create("Label")
-    warningLabel:SetText("|cFFFF0000WARNING:|r You are about to reset the entire player database!")
-    warningLabel:SetFullWidth(true)
-    frame:AddChild(warningLabel)
-
-    -- Count information
-    local countLabel = AceGUI:Create("Label")
-    countLabel:SetText("This will permanently delete " .. totalEntries .. " player entries from your database.")
-    countLabel:SetFullWidth(true)
-    frame:AddChild(countLabel)
-
-    -- Spacer
-    local spacer = AceGUI:Create("Label")
-    spacer:SetText(" ")
-    spacer:SetFullWidth(true)
-    frame:AddChild(spacer)
-
-    -- Confirmation question
-    local confirmLabel = AceGUI:Create("Label")
-    confirmLabel:SetText("Are you sure you want to continue?")
-    confirmLabel:SetFullWidth(true)
-    frame:AddChild(confirmLabel)
-
-    -- Button container
-    local buttonGroup = AceGUI:Create("SimpleGroup")
-    buttonGroup:SetFullWidth(true)
-    buttonGroup:SetLayout("Flow")
-    frame:AddChild(buttonGroup)
-
-    -- Confirm button (red)
-    local confirmButton = AceGUI:Create("Button")
-    confirmButton:SetText("|cFFFF0000Yes, Reset All|r")
-    confirmButton:SetWidth(150)
-    confirmButton:SetCallback("OnClick", function()
-        self.db.factionrealm.players = {}  -- Reset the factionrealm-specific players database
-        self:Print("All " .. totalEntries .. " known players have been reset.")
-        self:RefreshPlayerList()
-        frame:Hide()
-    end)
-    buttonGroup:AddChild(confirmButton)
-
-    -- Cancel button (green)
-    local cancelButton = AceGUI:Create("Button")
-    cancelButton:SetText("|cFF00FF00Cancel|r")
-    cancelButton:SetWidth(100)
-    cancelButton:SetCallback("OnClick", function()
-        self:Print("Reset operation cancelled.")
-        frame:Hide()
-    end)
-    buttonGroup:AddChild(cancelButton)
-
-    -- Show the frame
-    frame:Show()
+function Fellowship:ShowResetConfirmation()
+    StaticPopup_Show("KEHETS_FELLOWSHIP_RESET", CountPlayers())
 end
 
 -- Handle when the group is left

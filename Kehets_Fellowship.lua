@@ -1,5 +1,8 @@
--- Initialize Ace3 with AceConsole for slash commands, AceEvent for event handling, and AceDB for saved variables
-Fellowship = LibStub("AceAddon-3.0"):NewAddon("Kehet's Fellowship", "AceConsole-3.0", "AceEvent-3.0", "LibKehetsVerbosity-1.0")
+local ADDON_NAME = ...
+
+-- The addon table. Fellowship.db is set when the saved variables are loaded.
+Fellowship = { name = "Kehet's Fellowship" }
+LibStub("LibKehetsVerbosity-2.0"):Embed(Fellowship, function() return Fellowship.db and Fellowship.db.profile end)
 
 -- Messages the player can turn off or move in the Messages settings
 Fellowship:RegisterMessageTypes({
@@ -19,24 +22,6 @@ Fellowship:RegisterMessageTypes({
         order = 3,
     },
 })
-
--- Default structure for saved variables (faction-realm specific)
-local defaultSavedVariables = {
-    factionrealm = {
-        players = {},
-    },
-    profile = {
-        minimap = {
-            hide = false,
-        },
-        -- Sound played when a rated player joins the group
-        sound = {
-            enabled = true,
-            guild = true,
-            friends = true,
-        },
-    },
-}
 
 -- LibDataBroker object for the minimap icon
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fellowship", {
@@ -62,38 +47,84 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fello
 -- Initialize the minimap icon using LibDBIcon
 local icon = LibStub("LibDBIcon-1.0")
 
--- Initialize the addon and register slash commands
-function Fellowship:OnInitialize()
-    -- Set up AceDB with factionrealm scope
-    self.db = LibStub("AceDB-3.0"):New("FellowshipDB", defaultSavedVariables, true)
+-- Game events and the methods that handle them
+local eventHandlers = {
+    GROUP_ROSTER_UPDATE = "UpdatePartyMembers",
+    PARTY_LEADER_CHANGED = "UpdatePartyMembers",
+    PLAYER_ENTERING_WORLD = "UpdatePartyMembers",
+    GROUP_JOINED = "UpdatePartyMembers",
+    GROUP_FORMED = "UpdatePartyMembers",
+    GROUP_LEFT = "OnGroupLeft",
+    LFG_BOOT_PROPOSAL_UPDATE = "OnBootProposalUpdate",
+    LFG_PROPOSAL_SUCCEEDED = "OnLFGProposalSucceeded",
+    LOADING_SCREEN_ENABLED = "OnLoadingScreenEnabled",
+    LOADING_SCREEN_DISABLED = "OnLoadingScreenDisabled",
+}
 
-    icon:Register("Kehet's Fellowship", ldb, self.db.profile.minimap)
+-- Runs once the saved variables are loaded
+local function OnAddonLoaded()
+    FellowshipDB = FellowshipDB or {}
+    Fellowship.db = Fellowship.LoadDatabase(FellowshipDB)
 
-    self:RegisterOptions()
+    icon:Register("Kehet's Fellowship", ldb, Fellowship.db.profile.minimap)
 
-    -- Register slash commands
-    self:RegisterChatCommand("fellowship", "HandleSlashCommand")
-    self:RegisterChatCommand("fellow", "HandleSlashCommand")
+    Fellowship:RegisterOptions()
 end
 
--- Register events using AceEvent
-function Fellowship:OnEnable()
-    self:Notify("banner", "Enabled - Use /fellow list to open the known players window, /fellow or /fellowship to list all commands")
-    self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdatePartyMembers")
-    self:RegisterEvent("PARTY_LEADER_CHANGED", "UpdatePartyMembers")
-    self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdatePartyMembers")
-    self:RegisterEvent("GROUP_JOINED", "UpdatePartyMembers")
-    self:RegisterEvent("GROUP_FORMED", "UpdatePartyMembers")
-    self:RegisterEvent("GROUP_LEFT", "OnGroupLeft")
-    self:RegisterEvent("LFG_BOOT_PROPOSAL_UPDATE", "OnBootProposalUpdate")
-    self:RegisterEvent("LFG_PROPOSAL_SUCCEEDED", "OnLFGProposalSucceeded")
-    self:RegisterEvent("LOADING_SCREEN_ENABLED", "OnLoadingScreenEnabled")
-    self:RegisterEvent("LOADING_SCREEN_DISABLED", "OnLoadingScreenDisabled")
+-- Runs when the player is in the world, where AceAddon used to call OnEnable
+local function OnPlayerLogin(frame)
+    Fellowship:Notify("banner", "Enabled - Use /fellow list to open the known players window, /fellow or /fellowship to list all commands")
+    for event in pairs(eventHandlers) do
+        frame:RegisterEvent(event)
+    end
+end
+
+local events = CreateFrame("Frame")
+events:RegisterEvent("ADDON_LOADED")
+events:RegisterEvent("PLAYER_LOGIN")
+events:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" then
+        if ... == ADDON_NAME then
+            self:UnregisterEvent("ADDON_LOADED")
+            OnAddonLoaded()
+        end
+    elseif event == "PLAYER_LOGIN" then
+        self:UnregisterEvent("PLAYER_LOGIN")
+        OnPlayerLogin(self)
+    else
+        Fellowship[eventHandlers[event]](Fellowship, event, ...)
+    end
+end)
+
+-- Split a slash command into words. Text in double or single quotes is one word, as with AceConsole's GetArgs.
+local function GetArgs(input, count)
+    local args = {}
+    local pos = 1
+    while #args < count do
+        local start = input:find("[^ ]", pos)
+        if not start then
+            break
+        end
+        local quote = input:sub(start, start)
+        local finish
+        if quote == '"' or quote == "'" then
+            finish = input:find(quote, start + 1, true)
+            table.insert(args, input:sub(start + 1, (finish or #input + 1) - 1))
+        else
+            finish = input:find(" ", start, true)
+            table.insert(args, input:sub(start, (finish or #input + 1) - 1))
+        end
+        if not finish then
+            break
+        end
+        pos = finish + 1
+    end
+    return unpack(args, 1, count)
 end
 
 -- Slash command handler
 function Fellowship:HandleSlashCommand(input)
-    local command, playerName, score, note, tags = self:GetArgs(input:lower(), 5)
+    local command, playerName, score, note, tags = GetArgs(input:lower(), 5)
 
     if command == "list" then
         self:ShowPlayerList()
@@ -134,4 +165,10 @@ function Fellowship:HandleSlashCommand(input)
         self:Print(" '/fellow add <playerName> <score> [note [tags]]' - tags are comma-separated")
         self:Print(" '/fellow remove <playerName>")
     end
+end
+
+SLASH_KEHETSFELLOWSHIP1 = "/fellowship"
+SLASH_KEHETSFELLOWSHIP2 = "/fellow"
+SlashCmdList.KEHETSFELLOWSHIP = function(input)
+    Fellowship:HandleSlashCommand(input)
 end

@@ -1,5 +1,5 @@
 -- Player list window: every known player in a table with sorting, filtering and pagination
-local AceGUI = LibStub("AceGUI-3.0")
+local UI = Fellowship.UI
 
 local PAGE_SIZE = 25
 local ROW_HEIGHT = 16
@@ -162,9 +162,8 @@ end
 local CELL_PADDING = 3
 local ROW_HIGHLIGHT = "Interface\\QuestFrame\\UI-QuestTitleHighlight"
 
--- Frames cannot be destroyed, so the table is created on first use and moved
--- into each new window
-local playerTable
+-- The window is created on first use and kept, since frames cannot be destroyed
+local window
 
 -- Create one font string per column across a row or header frame
 local function CreateCells(parent, fontObject)
@@ -183,17 +182,13 @@ local function CreateCells(parent, fontObject)
     return cells
 end
 
-local function GetPlayerTable()
-    if playerTable then
-        return playerTable
-    end
-
+local function CreatePlayerTable(parent)
     local width = 0
     for _, column in ipairs(columns) do
         width = width + column.width
     end
 
-    local tableFrame = CreateFrame("Frame", nil, UIParent)
+    local tableFrame = CreateFrame("Frame", nil, parent)
     tableFrame:SetSize(width, ROW_HEIGHT * (PAGE_SIZE + 1) + 2)
 
     local background = tableFrame:CreateTexture(nil, "BACKGROUND")
@@ -258,116 +253,90 @@ local function GetPlayerTable()
     tableFrame.emptyText = tableFrame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
     tableFrame.emptyText:SetPoint("CENTER")
 
-    playerTable = tableFrame
-    return playerTable
+    return tableFrame
+end
+
+local function CreateWindow()
+    local frame = UI.CreateWindow("KehetsFellowshipPlayerList", "Kehet's Fellowship - Known Players", 900, 560)
+    frame:SetScript("OnHide", function()
+        GameTooltip:Hide()
+        frame.search:ClearFocus()
+    end)
+
+    -- Filters
+    local search = CreateFrame("EditBox", nil, frame, "SearchBoxTemplate")
+    search:SetPoint("TOPLEFT", 36, -36)
+    search:SetSize(300, 20)
+    search:SetAutoFocus(false)
+    if search.Instructions then
+        search.Instructions:SetText("Search name, class, tags or note")
+    end
+    search:SetText(filterText)
+    search:HookScript("OnTextChanged", function(self)
+        if self:GetText() ~= filterText then
+            filterText = self:GetText()
+            currentPage = 1
+            Fellowship:RefreshPlayerList()
+        end
+    end)
+    frame.search = search
+
+    local scoreLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    scoreLabel:SetPoint("LEFT", search, "RIGHT", 24, 0)
+    scoreLabel:SetText("Score:")
+
+    frame.scoreButtons = {}
+    local previous = scoreLabel
+    for _, key in ipairs(scoreFilterOrder) do
+        local button = UI.CreateButton(frame, scoreFilters[key], 90, function()
+            scoreFilter = key
+            currentPage = 1
+            Fellowship:RefreshPlayerList()
+        end)
+        button.label = scoreFilters[key]
+        button:SetPoint("LEFT", previous, "RIGHT", 6, 0)
+        frame.scoreButtons[key] = button
+        previous = button
+    end
+
+    frame.table = CreatePlayerTable(frame)
+    frame.table:SetPoint("TOP", 0, -68)
+
+    -- Pagination
+    frame.pageLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    frame.pageLabel:SetPoint("BOTTOM", 0, 18)
+    frame.pageLabel:SetWidth(200)
+
+    frame.prevButton = UI.CreateButton(frame, "< Previous", 110, function()
+        currentPage = currentPage - 1
+        Fellowship:RefreshPlayerList()
+    end)
+    frame.prevButton:SetPoint("RIGHT", frame.pageLabel, "LEFT", -4, 0)
+
+    frame.nextButton = UI.CreateButton(frame, "Next >", 110, function()
+        currentPage = currentPage + 1
+        Fellowship:RefreshPlayerList()
+    end)
+    frame.nextButton:SetPoint("LEFT", frame.pageLabel, "RIGHT", 4, 0)
+
+    frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.status:SetPoint("BOTTOMLEFT", 36, 22)
+
+    return frame
 end
 
 -- Show the player list window, or refresh it if it is already open
 function Fellowship:ShowPlayerList()
-    if self.playerListWidgets then
-        self:RefreshPlayerList()
-        return
+    if not window then
+        window = CreateWindow()
     end
-
-    local widgets = {}
-    local st = GetPlayerTable()
-    widgets.table = st
-
-    local frame = AceGUI:Create("Frame")
-    frame:SetTitle("Kehet's Fellowship - Known Players")
-    frame:SetLayout("Flow")
-    frame:SetWidth(900)
-    frame:SetHeight(600)
-    frame:EnableResize(false)
-    frame:SetCallback("OnClose", function(widget)
-        -- Detach the table before AceGUI recycles its container for another window
-        GameTooltip:Hide()
-        st:Hide()
-        st:ClearAllPoints()
-        st:SetParent(UIParent)
-        AceGUI:Release(widget)
-        self.playerListWidgets = nil
-    end)
-    widgets.frame = frame
-
-    -- Filters
-    local searchBox = AceGUI:Create("EditBox")
-    searchBox:SetLabel("Search name, class, tags or note")
-    searchBox:SetText(filterText)
-    searchBox:SetWidth(300)
-    searchBox:DisableButton(true)
-    searchBox:SetCallback("OnTextChanged", function(widget, event, text)
-        filterText = text
-        currentPage = 1
-        self:RefreshPlayerList()
-    end)
-    frame:AddChild(searchBox)
-
-    local scoreDropdown = AceGUI:Create("Dropdown")
-    scoreDropdown:SetLabel("Score")
-    scoreDropdown:SetList(scoreFilters, scoreFilterOrder)
-    scoreDropdown:SetValue(scoreFilter)
-    scoreDropdown:SetWidth(150)
-    scoreDropdown:SetCallback("OnValueChanged", function(widget, event, key)
-        scoreFilter = key
-        currentPage = 1
-        self:RefreshPlayerList()
-    end)
-    frame:AddChild(scoreDropdown)
-
-    -- Placeholder that reserves space for the table
-    local tableHolder = AceGUI:Create("SimpleGroup")
-    tableHolder:SetFullWidth(true)
-    tableHolder:SetAutoAdjustHeight(false) -- It has no AceGUI children to size it
-    tableHolder:SetHeight(st:GetHeight() + 8)
-    frame:AddChild(tableHolder)
-
-    st:SetParent(tableHolder.frame)
-    st:ClearAllPoints()
-    st:SetPoint("TOPLEFT", tableHolder.frame, "TOPLEFT", 0, -4)
-    st:Show()
-
-    -- Pagination
-    local footer = AceGUI:Create("SimpleGroup")
-    footer:SetFullWidth(true)
-    footer:SetLayout("Flow")
-    frame:AddChild(footer)
-
-    local prevButton = AceGUI:Create("Button")
-    prevButton:SetText("< Previous")
-    prevButton:SetWidth(110)
-    prevButton:SetCallback("OnClick", function()
-        currentPage = currentPage - 1
-        self:RefreshPlayerList()
-    end)
-    footer:AddChild(prevButton)
-    widgets.prevButton = prevButton
-
-    local pageLabel = AceGUI:Create("Label")
-    pageLabel:SetWidth(200)
-    pageLabel:SetJustifyH("CENTER")
-    footer:AddChild(pageLabel)
-    widgets.pageLabel = pageLabel
-
-    local nextButton = AceGUI:Create("Button")
-    nextButton:SetText("Next >")
-    nextButton:SetWidth(110)
-    nextButton:SetCallback("OnClick", function()
-        currentPage = currentPage + 1
-        self:RefreshPlayerList()
-    end)
-    footer:AddChild(nextButton)
-    widgets.nextButton = nextButton
-
-    self.playerListWidgets = widgets
+    window:Show()
     self:RefreshPlayerList()
-    frame:Show()
 end
 
 -- Rebuild the table from the database. Does nothing if the window is closed.
 function Fellowship:RefreshPlayerList()
-    local widgets = self.playerListWidgets
-    if not widgets then
+    if not window or not window:IsShown() then
         return
     end
 
@@ -377,7 +346,7 @@ function Fellowship:RefreshPlayerList()
     local pageCount = math.max(1, math.ceil(#entries / PAGE_SIZE))
     currentPage = math.min(math.max(currentPage, 1), pageCount)
 
-    local st = widgets.table
+    local st = window.table
     for i, column in ipairs(columns) do
         local text = column.title
         if column.key == sortKey then
@@ -407,13 +376,14 @@ function Fellowship:RefreshPlayerList()
         st.emptyText:Hide()
     end
 
-    widgets.pageLabel:SetText("Page " .. currentPage .. " of " .. pageCount)
-    widgets.prevButton:SetDisabled(currentPage <= 1)
-    widgets.nextButton:SetDisabled(currentPage >= pageCount)
+    UI.SetChosen(window.scoreButtons, scoreFilter)
+    window.pageLabel:SetText("Page " .. currentPage .. " of " .. pageCount)
+    window.prevButton:SetEnabled(currentPage > 1)
+    window.nextButton:SetEnabled(currentPage < pageCount)
 
     local total = 0
     for _ in pairs(players) do
         total = total + 1
     end
-    widgets.frame:SetStatusText(#entries .. " of " .. total .. " known players shown")
+    window.status:SetText(#entries .. " of " .. total .. " known players shown")
 end

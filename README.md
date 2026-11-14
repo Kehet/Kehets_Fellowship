@@ -30,14 +30,14 @@ Left-click the minimap button to open the rating window for your previous group 
 
 ## Settings
 
-Open the settings page from the game menu under Options, AddOns, Kehet's Fellowship, or use `/fellow config` to open it in its own window. The page has these settings:
+Open the settings page from the game menu under Options, AddOns, Kehet's Fellowship, or use `/fellow config` to open it. The page has these settings:
 
 - Play a sound when a rated player joins.
 - Play the sound for guild members.
 - Play the sound for friends.
 - Show the minimap button.
 
-The Messages group has the login message, the message for a known player who joins and the vote kick message. Each message has these settings:
+The Messages page under it has the login message, the message for a known player who joins and the vote kick message. Each message has these settings:
 
 - Show: turn the message on or off.
 - Show in: one or more of the chat windows, the error frame, the raid warning frame, the boss emote frame and the floating combat text. Parrot, MikScrollingBattleText, BigWigs and DBM outputs are listed while those addons are loaded.
@@ -66,7 +66,7 @@ Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 | `/fellow add <player> <score> [note [tags]]` | Set a score, and optionally a note and comma-separated tags |
 | `/fellow remove <player>` | Remove a player from the list |
 | `/fellow reset` | Remove all known players, after a confirmation |
-| `/fellow config` | Open the settings window |
+| `/fellow config` | Open the settings page |
 | `/fellow toggleicon` | Show or hide the minimap button |
 | `/fellow sound` | Turn the rated player join sound on or off |
 | `/fellow sound guild` | Turn the join sound on or off for guild members |
@@ -78,7 +78,6 @@ Use `/fellow` or `/fellowship`. Player names use the format `name-realm`.
 - World of Warcraft: Mists of Pandaria Classic
 - World of Warcraft: Classic Era
 - World of Warcraft: Forever
-- The [Ace3](https://www.curseforge.com/wow/addons/ace3) addon
 
 ## License
 
