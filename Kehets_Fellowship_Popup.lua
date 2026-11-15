@@ -1,5 +1,103 @@
--- AceGUI is part of the Ace3 library, so we use it to create the prettier UI.
-local AceGUI = LibStub("AceGUI-3.0")
+-- Popup that asks the player to rate the players of the group they just left
+local UI = Fellowship.UI
+
+local WINDOW_WIDTH = 520
+local ROW_HEIGHT = 74
+local ROW_SPACING = 12
+local CONTENT_WIDTH = WINDOW_WIDTH - 44
+
+-- The window is created on first use and kept
+local window
+
+-- Parse comma-separated tags, trimming whitespace and dropping empty ones
+local function ParseTags(text)
+    local tagList = {}
+    if text and text ~= "" then
+        for tag in string.gmatch(text, "[^,]+") do
+            local trimmedTag = string.match(tag, "^%s*(.-)%s*$")
+            if trimmedTag ~= "" then
+                table.insert(tagList, trimmedTag)
+            end
+        end
+    end
+    return tagList
+end
+
+local function GetPlayer(playerName)
+    local players = Fellowship.db.factionrealm.players
+    players[playerName] = players[playerName] or {}
+    return players[playerName]
+end
+
+-- Build the controls of a pooled row once; InitRow fills them for one player
+local function BuildRow(row)
+    row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    row.name:SetPoint("TOPLEFT", 4, -6)
+    row.name:SetWidth(150)
+    row.name:SetJustifyH("LEFT")
+    row.name:SetWordWrap(false)
+
+    -- Score buttons from -2 to 2
+    row.scoreButtons = {}
+    for score = -2, 2 do
+        local button = UI.CreateButton(row, tostring(score), 44, function()
+            GetPlayer(row.playerName).score = score
+            Fellowship:Print("Player " .. row.playerName .. " scored: " .. score)
+            UI.SetChosen(row.scoreButtons, score)
+            Fellowship:RefreshPlayerList()
+        end)
+        button:SetPoint("TOPLEFT", 160 + (score + 2) * 48, -2)
+        row.scoreButtons[score] = button
+    end
+
+    local boxWidth = (CONTENT_WIDTH - 24) / 2
+    row.note = UI.CreateEditBox(row, "Note:", boxWidth, function(text)
+        GetPlayer(row.playerName).note = text
+        Fellowship:Print("Note for " .. row.playerName .. ": " .. text)
+        Fellowship:RefreshPlayerList()
+    end)
+    row.note:SetPoint("TOPLEFT", 8, -44)
+
+    row.tags = UI.CreateEditBox(row, "Tags (comma-separated):", boxWidth, function(text)
+        local tagList = ParseTags(text)
+        GetPlayer(row.playerName).tags = tagList
+        Fellowship:Print("Tags for " .. row.playerName .. ": " .. table.concat(tagList, ", "))
+        Fellowship:RefreshPlayerList()
+    end)
+    row.tags:SetPoint("LEFT", row.note, "RIGHT", 12, 0)
+end
+
+local function InitRow(row, element)
+    if not row.name then
+        BuildRow(row)
+    end
+
+    local playerData = Fellowship.db.factionrealm.players[element.playerName] or {}
+    row.playerName = element.playerName
+    row.name:SetText(ColorizeNameByClass(element.playerName, playerData.class))
+    UI.SetChosen(row.scoreButtons, playerData.score)
+    row.note:ClearFocus()
+    row.note:SetText(playerData.note or "")
+    row.note:SetCursorPosition(0)
+    row.tags:ClearFocus()
+    row.tags:SetText(table.concat(playerData.tags or {}, ", "))
+    row.tags:SetCursorPosition(0)
+end
+
+local function CreateWindow()
+    local frame = UI.CreateWindow("KehetsFellowshipLastGroup", "Remember Players from Your Last Group", WINDOW_WIDTH, 340)
+
+    frame.list = UI.CreateScrollList(frame, "Frame", ROW_HEIGHT, InitRow, ROW_SPACING)
+    frame.list:SetPoint("TOPLEFT", 10, -30)
+    frame.list:SetPoint("BOTTOMRIGHT", -10, 42)
+
+    frame.closeButton = UI.CreateButton(frame, "Close", 100, function()
+        frame:Hide()
+    end)
+    frame.closeButton:SetPoint("BOTTOM", 0, 12)
+
+    return frame
+end
 
 -- Function to show a popup for remembering players from the previous group
 function Fellowship:ShowPreviousGroupPopup()
@@ -9,161 +107,31 @@ function Fellowship:ShowPreviousGroupPopup()
         return
     end
 
-    -- Replace an already open popup instead of stacking a second one on top of it
-    if self.previousGroupPopup then
-        self.previousGroupPopup:Hide()
+    if not window then
+        window = CreateWindow()
     end
 
-    -- Create a frame for the AceGUI popup (increased width)
-    local frame = AceGUI:Create("Frame")
-    frame:SetTitle("Remember Players from Your Last Group")
-    frame:SetCallback("OnClose", function(widget)
-        AceGUI:Release(widget)
-        self.previousGroupPopup = nil
-    end)
-    self.previousGroupPopup = frame
-    frame:SetLayout("Flow")
-    frame:SetWidth(500)  -- Increased width to prevent wrapping
-    frame:SetHeight(300)
-
-    -- Create an AceGUI scroll container to handle large lists
-    local scrollContainer = AceGUI:Create("SimpleGroup")
-    scrollContainer:SetFullWidth(true)
-    scrollContainer:SetFullHeight(true)
-    scrollContainer:SetLayout("Fill")
-    frame:AddChild(scrollContainer)
-
-    local scroll = AceGUI:Create("ScrollFrame")
-    scroll:SetLayout("List")
-    scrollContainer:AddChild(scroll)
-
-    -- Function to create score buttons for each player
-    local function CreateScoreButtons(playerName, info, roleTag)
-        local group = AceGUI:Create("SimpleGroup")
-        group:SetFullWidth(true)
-        group:SetLayout("Flow")
-
-        -- Add player name label
-        local nameLabel = AceGUI:Create("Label")
-        nameLabel:SetText(ColorizeNameByClass(playerName, info.class))
-        nameLabel:SetWidth(150)
-        group:AddChild(nameLabel)
-
-        -- Get current score, note, and tags for the player if they exist
-        local playerData = Fellowship.db.factionrealm.players[playerName] or {}
-
+    local elements = {}
+    for playerName, roleTag in pairs(previousGroupMembers) do
         -- Tag the player with the role they had in the group, unless they already have that tag
-        if type(roleTag) == "string" then
+        local playerData = self.db.factionrealm.players[playerName]
+        if playerData and type(roleTag) == "string" then
             playerData.tags = playerData.tags or {}
             AddTagIfMissing(playerData.tags, roleTag)
         end
-
-        local currentScore = playerData.score or nil
-        local currentNote = playerData.note or ""
-        local currentTags = playerData.tags or {}
-        local currentTagsText = table.concat(currentTags, ", ")
-
-        -- Store the button that matches the current score, if any
-        local currentScoreButton = nil
-
-        -- Create score buttons from -2 to 2
-        for score = -2, 2 do
-            local button = AceGUI:Create("Button")
-            button:SetText(tostring(score))  -- Convert score to string to ensure text appears
-            button:SetWidth(50)  -- Adjust button width slightly for better alignment
-            button:SetHeight(30)  -- Ensure the button height is set
-            button.score = score  -- Store the button's score directly in the button object
-
-            -- Disable the button if the current score matches
-            if currentScore ~= nil and currentScore == score then
-                button:SetDisabled(true)
-                button:SetText("|cFF00FF00" .. tostring(score) .. "|r")  -- Highlight the current score in green
-                currentScoreButton = button  -- Keep track of the button corresponding to the current score
-            end
-
-            button:SetCallback("OnClick", function()
-                -- Update the player's score in the factionrealm-specific database
-                self.db.factionrealm.players[playerName].score = score
-                self:Print("Player " .. playerName .. " scored: " .. score)
-
-                -- Re-enable the previously disabled button (if any)
-                if currentScoreButton then
-                    currentScoreButton:SetDisabled(false)
-                    currentScoreButton:SetText(tostring(currentScoreButton.score))  -- Reset text color using stored score
-                end
-
-                -- Disable and highlight the newly clicked button
-                button:SetDisabled(true)
-                button:SetText("|cFF00FF00" .. tostring(score) .. "|r")  -- Highlight selected score
-
-                -- Update current score button reference
-                currentScoreButton = button
-            end)
-
-            group:AddChild(button)
-        end
-
-        -- Add a text box for notes
-        local noteBox = AceGUI:Create("EditBox")
-        noteBox:SetLabel("Note:")
-        noteBox:SetText(currentNote)
-        noteBox:SetRelativeWidth(0.5)  -- Half the row each, so note and tags share one line
-        noteBox:SetCallback("OnEnterPressed", function(widget, event, text)
-            -- Save the note to the database
-            Fellowship.db.factionrealm.players[playerName] = Fellowship.db.factionrealm.players[playerName] or {}
-            Fellowship.db.factionrealm.players[playerName].note = text
-            print("Note for " .. playerName .. ": " .. text)
-        end)
-
-        group:AddChild(noteBox)
-
-        -- Add a text box for tags
-        local tagsBox = AceGUI:Create("EditBox")
-        tagsBox:SetLabel("Tags (comma-separated):")
-        tagsBox:SetText(currentTagsText)
-        tagsBox:SetRelativeWidth(0.5)
-        tagsBox:SetCallback("OnEnterPressed", function(widget, event, text)
-            -- Parse tags and save to the database
-            local tagList = {}
-            if text and text ~= "" then
-                for tag in string.gmatch(text, "[^,]+") do
-                    local trimmedTag = string.match(tag, "^%s*(.-)%s*$") -- Trim whitespace
-                    if trimmedTag ~= "" then
-                        table.insert(tagList, trimmedTag)
-                    end
-                end
-            end
-
-            Fellowship.db.factionrealm.players[playerName] = Fellowship.db.factionrealm.players[playerName] or {}
-            Fellowship.db.factionrealm.players[playerName].tags = tagList
-            print("Tags for " .. playerName .. ": " .. table.concat(tagList, ", "))
-        end)
-
-        group:AddChild(tagsBox)
-
-        scroll:AddChild(group)
+        table.insert(elements, { playerName = playerName })
     end
+    table.sort(elements, function(a, b) return a.playerName < b.playerName end)
 
-    -- Create a group with buttons for each player
-    for playerName, roleTag in pairs(previousGroupMembers) do
-        CreateScoreButtons(playerName, self.db.factionrealm.players[playerName], roleTag)
-    end
-
-    -- Close button at the bottom
-    local closeButton = AceGUI:Create("Button")
-    closeButton:SetText("Close")
-    closeButton:SetWidth(100)
-    closeButton:SetCallback("OnClick", function() frame:Hide() end)
-    frame:AddChild(closeButton)
-
-    -- Show the frame
-    frame:Show()
+    window.list.scrollBox:SetDataProvider(CreateDataProvider(elements))
+    window:Show()
+    window:Raise()
 end
 
 -- Close the previous group popup if it is open, otherwise show it
 function Fellowship:TogglePreviousGroupPopup()
-    if self.previousGroupPopup then
-        self.previousGroupPopup:Hide()
+    if window and window:IsShown() then
+        window:Hide()
     else
         self:ShowPreviousGroupPopup()
     end
