@@ -47,6 +47,30 @@ local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Kehet's Fello
 -- Initialize the minimap icon using LibDBIcon
 local icon = LibStub("LibDBIcon-1.0")
 
+-- List the addon in the addon drawer by the minimap, on clients that have one, with the clicks and
+-- tooltip of the minimap button. It stays there when the minimap button is hidden. The name is
+-- coloured like the title in the addon list.
+local function AddToAddonDrawer()
+    if not AddonCompartmentFrame or not AddonCompartmentFrame.RegisterAddon then
+        return
+    end
+    AddonCompartmentFrame:RegisterAddon({
+        text = "|cFF009900Kehet's|r Fellowship",
+        icon = ldb.icon,
+        notCheckable = true,
+        registerForAnyClick = true,
+        func = function(_, menuInputData, menu)
+            ldb.OnClick(menu, menuInputData.buttonName)
+        end,
+        funcOnEnter = function(button)
+            GameTooltip:SetOwner(button, "ANCHOR_LEFT")
+            ldb.OnTooltipShow(GameTooltip)
+            GameTooltip:Show()
+        end,
+        funcOnLeave = GameTooltip_Hide,
+    })
+end
+
 -- Game events and the methods that handle them
 local eventHandlers = {
     GROUP_ROSTER_UPDATE = "UpdatePartyMembers",
@@ -66,10 +90,10 @@ local function OnAddonLoaded()
     FellowshipDB = FellowshipDB or {}
     Fellowship.db = Fellowship.LoadDatabase(FellowshipDB)
 
+    -- An earlier test build listed the drawer entry through LibDBIcon, which saved this flag and would add a second entry
+    Fellowship.db.profile.minimap.showInCompartment = nil
     icon:Register("Kehet's Fellowship", ldb, Fellowship.db.profile.minimap)
-    -- Also list it in the addon drawer by the minimap, on clients that have one. It stays there
-    -- when the minimap button is hidden.
-    icon:AddButtonToCompartment("Kehet's Fellowship")
+    AddToAddonDrawer()
 
     Fellowship:RegisterOptions()
 end
