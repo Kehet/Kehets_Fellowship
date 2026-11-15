@@ -100,15 +100,45 @@ function UI.SetCheckbox(check, checked, disabled)
     end
 end
 
--- A row of buttons where one is chosen: the chosen one stays lit, like a selected tab
+-- A row of buttons where one is chosen: the chosen one stays lit with gold text, like a selected tab,
+-- and the others have grey text
 function UI.SetChosen(buttons, chosen)
     for value, button in pairs(buttons) do
         if value == chosen then
             button:LockHighlight()
+            button:SetNormalFontObject("GameFontNormal")
+            button:SetHighlightFontObject("GameFontNormal")
         else
             button:UnlockHighlight()
+            button:SetNormalFontObject("GameFontDisable")
+            button:SetHighlightFontObject("GameFontHighlight")
         end
     end
+end
+
+-- Score colours: red for bad, white for neutral, green for good
+local function FormatScore(value)
+    value = math.floor(value + 0.5)
+    if value < 0 then
+        return RED_FONT_COLOR:WrapTextInColorCode(tostring(value))
+    elseif value > 0 then
+        return GREEN_FONT_COLOR:WrapTextInColorCode("+" .. value)
+    end
+    return HIGHLIGHT_FONT_COLOR:WrapTextInColorCode("0")
+end
+
+-- A slider with step buttons, as in the game settings, for a score from -2 to 2.
+-- The score is shown on the right. onChange gets the new score as a whole number.
+function UI.CreateScoreSlider(parent, width, onChange)
+    local slider = CreateFrame("Frame", nil, parent, "MinimalSliderWithSteppersTemplate")
+    slider:SetSize(width, 24)
+    slider:Init(0, -2, 2, 4, {
+        [MinimalSliderWithSteppersMixin.Label.Right] = FormatScore,
+    })
+    slider:RegisterCallback(MinimalSliderWithSteppersMixin.Event.OnValueChanged, function(_, value)
+        onChange(math.floor(value + 0.5))
+    end)
+    return slider
 end
 
 -- A recessed box with a scrolling list inside: a ScrollBox with the thin scroll bar, as the native lists have.

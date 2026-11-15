@@ -2,10 +2,11 @@
 partyMembers = {}
 previousGroupMembers = {}
 
--- Get a player's full name in "CharacterName-RealmName" format
+-- Get a player's full name in "CharacterName-RealmName" format.
+-- Returns nil while the game has not loaded the name yet and gives "Unknown".
 function GetFullPlayerName(name, realm)
-    if not name or name == "" or name == "Unknown" then
-        name = UnitName("player")
+    if not name or name == "" or name == UNKNOWNOBJECT then
+        return nil
     end
     if not realm or realm == "" then
         return string.lower(name)
@@ -269,8 +270,9 @@ function Fellowship:ProcessGroupUnit(unit, fullPlayerName, instanceID)
         return
     end
 
+    -- A name that has not loaded is picked up in a later roster update
     local fullName = GetFullPlayerName(name, realm)
-    if fullName == fullPlayerName then
+    if not fullName or fullName == fullPlayerName then
         return
     end
 
