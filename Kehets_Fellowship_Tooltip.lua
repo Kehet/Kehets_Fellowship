@@ -34,7 +34,7 @@ local function AddPlayerScore(self)
         local fullName = GetFullPlayerName(playerName, playerRealm)
 
 
-        if Fellowship.db.factionrealm.players[fullName] then
+        if fullName and Fellowship.db.factionrealm.players[fullName] then
 
             local score = Fellowship.db.factionrealm.players[fullName].score
             local note = Fellowship.db.factionrealm.players[fullName].note

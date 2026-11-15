@@ -28,6 +28,7 @@ globals = {
 
 -- WoW API, FrameXML and libraries
 read_globals = {
+    "UNKNOWNOBJECT",
     "AddonCompartmentFrame",
     "CreateDataProvider",
     "CreateScrollBoxListLinearView",
