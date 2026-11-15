@@ -4,6 +4,25 @@ local ADDON_NAME = ...
 Fellowship = { name = "Kehet's Fellowship" }
 LibStub("LibKehetsVerbosity-2.0"):Embed(Fellowship, function() return Fellowship.db and Fellowship.db.profile end)
 
+-- Chat lines start with a short name, coloured like "Kehet's" in the addon title. The library prints
+-- its messages through this too. A chat frame may come before the text, as with the library's Print.
+local CHAT_PREFIX = "|cFF009900Fellowship|r: "
+
+local function Print(self, ...)
+    local frame, first = DEFAULT_CHAT_FRAME, 1
+    local candidate = ...
+    if type(candidate) == "table" and type(candidate.AddMessage) == "function" then
+        frame, first = candidate, 2
+    end
+
+    local parts = {}
+    for index = first, select("#", ...) do
+        table.insert(parts, tostring((select(index, ...))))
+    end
+    frame:AddMessage(CHAT_PREFIX .. table.concat(parts, " "))
+end
+Fellowship.Print = Print
+
 -- Messages the player can turn off or move in the Messages settings
 Fellowship:RegisterMessageTypes({
     banner = {
@@ -100,6 +119,8 @@ end
 
 -- Runs when the player is in the world, where AceAddon used to call OnEnable
 local function OnPlayerLogin(frame)
+    -- A newer copy of the library that loads after this addon embeds itself again and replaces Print
+    Fellowship.Print = Print
     Fellowship:Notify("banner", "Enabled - Use /fellow list to open the known players window, /fellow or /fellowship to list all commands")
     for event in pairs(eventHandlers) do
         frame:RegisterEvent(event)
