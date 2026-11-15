@@ -67,6 +67,9 @@ local function OnAddonLoaded()
     Fellowship.db = Fellowship.LoadDatabase(FellowshipDB)
 
     icon:Register("Kehet's Fellowship", ldb, Fellowship.db.profile.minimap)
+    -- Also list it in the addon drawer by the minimap, on clients that have one. It stays there
+    -- when the minimap button is hidden.
+    icon:AddButtonToCompartment("Kehet's Fellowship")
 
     Fellowship:RegisterOptions()
 end

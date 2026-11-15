@@ -28,6 +28,8 @@ The player list is stored separately for each faction on each realm.
 
 Left-click the minimap button to open the rating window for your previous group again. Right-click it to open the player list.
 
+In WoW: Forever the addon is also listed in the addon drawer by the minimap, with the same clicks. It stays there when the minimap button is hidden.
+
 ## Settings
 
 Open the settings page from the game menu under Options, AddOns, Kehet's Fellowship, or use `/fellow config` to open it. The page has these settings:
