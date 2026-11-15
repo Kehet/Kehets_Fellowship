@@ -12,4 +12,4 @@ externals:
     Libs/LibDBIcon-1.0: https://repos.curseforge.com/wow/libdbicon-1-0/trunk/LibDBIcon-1.0
     Libs/LibKehetsVerbosity-2.0:
         url: https://github.com/Kehet/LibKehetsVerbosity-2.0
-        tag: 2.1.0
+        tag: 2.0.0
