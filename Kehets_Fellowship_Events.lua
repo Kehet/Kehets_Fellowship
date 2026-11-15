@@ -228,13 +228,17 @@ function Fellowship:PopulateFakeData()
 end
 
 
-function Fellowship:ToggleMinimapIcon()
-    self.db.profile.minimap.hide = not self.db.profile.minimap.hide
-    if self.db.profile.minimap.hide then
-        LibStub("LibDBIcon-1.0"):Hide("Kehet's Fellowship")
-    else
+function Fellowship:SetMinimapIconShown(shown)
+    self.db.profile.minimap.hide = not shown
+    if shown then
         LibStub("LibDBIcon-1.0"):Show("Kehet's Fellowship")
+    else
+        LibStub("LibDBIcon-1.0"):Hide("Kehet's Fellowship")
     end
+end
+
+function Fellowship:ToggleMinimapIcon()
+    self:SetMinimapIconShown(self.db.profile.minimap.hide)
     self:RefreshOptions()
 end
 

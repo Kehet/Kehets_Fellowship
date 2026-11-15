@@ -28,6 +28,10 @@ globals = {
 
 -- WoW API, FrameXML and libraries
 read_globals = {
+    "CreateDataProvider",
+    "CreateScrollBoxListLinearView",
+    "CreateSettingsListSectionHeaderInitializer",
+    "ScrollUtil",
     "C_GameRules",
     "C_XMLUtil",
     "GameTooltip_Hide",

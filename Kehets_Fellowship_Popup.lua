@@ -3,11 +3,10 @@ local UI = Fellowship.UI
 
 local WINDOW_WIDTH = 520
 local ROW_HEIGHT = 74
-local CONTENT_WIDTH = WINDOW_WIDTH - 60
+local CONTENT_WIDTH = WINDOW_WIDTH - 44
 
--- The window is created on first use and kept, with one row per player that is reused
+-- The window is created on first use and kept
 local window
-local rows = {}
 
 -- Parse comma-separated tags, trimming whitespace and dropping empty ones
 local function ParseTags(text)
@@ -29,15 +28,8 @@ local function GetPlayer(playerName)
     return players[playerName]
 end
 
-local function GetRow(index)
-    if rows[index] then
-        return rows[index]
-    end
-
-    local row = CreateFrame("Frame", nil, window.content)
-    row:SetSize(CONTENT_WIDTH, ROW_HEIGHT)
-    row:SetPoint("TOPLEFT", 0, -(index - 1) * ROW_HEIGHT)
-
+-- Build the controls of a pooled row once; InitRow fills them for one player
+local function BuildRow(row)
     row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     row.name:SetPoint("TOPLEFT", 4, -6)
     row.name:SetWidth(150)
@@ -53,7 +45,6 @@ local function GetRow(index)
             UI.SetChosen(row.scoreButtons, score)
             Fellowship:RefreshPlayerList()
         end)
-        button.label = tostring(score)
         button:SetPoint("TOPLEFT", 160 + (score + 2) * 48, -2)
         row.scoreButtons[score] = button
     end
@@ -73,31 +64,31 @@ local function GetRow(index)
         Fellowship:RefreshPlayerList()
     end)
     row.tags:SetPoint("LEFT", row.note, "RIGHT", 12, 0)
+end
 
-    rows[index] = row
-    return row
+local function InitRow(row, element)
+    if not row.name then
+        BuildRow(row)
+    end
+
+    local playerData = Fellowship.db.factionrealm.players[element.playerName] or {}
+    row.playerName = element.playerName
+    row.name:SetText(ColorizeNameByClass(element.playerName, playerData.class))
+    UI.SetChosen(row.scoreButtons, playerData.score)
+    row.note:ClearFocus()
+    row.note:SetText(playerData.note or "")
+    row.note:SetCursorPosition(0)
+    row.tags:ClearFocus()
+    row.tags:SetText(table.concat(playerData.tags or {}, ", "))
+    row.tags:SetCursorPosition(0)
 end
 
 local function CreateWindow()
     local frame = UI.CreateWindow("KehetsFellowshipLastGroup", "Remember Players from Your Last Group", WINDOW_WIDTH, 340)
-    frame:SetScript("OnHide", function()
-        for _, row in ipairs(rows) do
-            row.note:ClearFocus()
-            row.tags:ClearFocus()
-        end
-    end)
 
-    local inset = CreateFrame("Frame", nil, frame, UI.HasTemplate("InsetFrameTemplate3") and "InsetFrameTemplate3" or nil)
-    inset:SetPoint("TOPLEFT", 10, -30)
-    inset:SetPoint("BOTTOMRIGHT", -10, 42)
-
-    frame.scroll = CreateFrame("ScrollFrame", nil, inset, "UIPanelScrollFrameTemplate")
-    frame.scroll:SetPoint("TOPLEFT", 6, -6)
-    frame.scroll:SetPoint("BOTTOMRIGHT", -26, 6)
-
-    frame.content = CreateFrame("Frame", nil, frame.scroll)
-    frame.content:SetSize(CONTENT_WIDTH, 1)
-    frame.scroll:SetScrollChild(frame.content)
+    frame.list = UI.CreateScrollList(frame, "Frame", ROW_HEIGHT, InitRow)
+    frame.list:SetPoint("TOPLEFT", 10, -30)
+    frame.list:SetPoint("BOTTOMRIGHT", -10, 42)
 
     frame.closeButton = UI.CreateButton(frame, "Close", 100, function()
         frame:Hide()
@@ -119,33 +110,19 @@ function Fellowship:ShowPreviousGroupPopup()
         window = CreateWindow()
     end
 
-    local index = 0
+    local elements = {}
     for playerName, roleTag in pairs(previousGroupMembers) do
-        index = index + 1
-        local row = GetRow(index)
-        local playerData = self.db.factionrealm.players[playerName] or {}
-
         -- Tag the player with the role they had in the group, unless they already have that tag
-        if type(roleTag) == "string" then
+        local playerData = self.db.factionrealm.players[playerName]
+        if playerData and type(roleTag) == "string" then
             playerData.tags = playerData.tags or {}
             AddTagIfMissing(playerData.tags, roleTag)
         end
-
-        row.playerName = playerName
-        row.name:SetText(ColorizeNameByClass(playerName, playerData.class))
-        UI.SetChosen(row.scoreButtons, playerData.score)
-        row.note:SetText(playerData.note or "")
-        row.note:SetCursorPosition(0)
-        row.tags:SetText(table.concat(playerData.tags or {}, ", "))
-        row.tags:SetCursorPosition(0)
-        row:Show()
+        table.insert(elements, { playerName = playerName })
     end
-    for i = index + 1, #rows do
-        rows[i]:Hide()
-    end
+    table.sort(elements, function(a, b) return a.playerName < b.playerName end)
 
-    window.content:SetHeight(math.max(1, index * ROW_HEIGHT))
-    window.scroll:SetVerticalScroll(0)
+    window.list.scrollBox:SetDataProvider(CreateDataProvider(elements))
     window:Show()
     window:Raise()
 end

@@ -100,11 +100,80 @@ function UI.SetCheckbox(check, checked, disabled)
     end
 end
 
--- A row of buttons where one is chosen: the chosen one is greyed out and shows its text in green
+-- A row of buttons where one is chosen: the chosen one stays lit, like a selected tab
 function UI.SetChosen(buttons, chosen)
     for value, button in pairs(buttons) do
-        local isChosen = value == chosen
-        button:SetEnabled(not isChosen)
-        button:SetText(isChosen and ("|cFF00FF00" .. button.label .. "|r") or button.label)
+        if value == chosen then
+            button:LockHighlight()
+        else
+            button:UnlockHighlight()
+        end
     end
+end
+
+-- A recessed box with a scrolling list inside: a ScrollBox with the thin scroll bar, as the native lists have.
+-- initializer(frame, elementData) fills a pooled row of the given frame type and height.
+function UI.CreateScrollList(parent, frameType, rowHeight, initializer)
+    local inset = CreateFrame("Frame", nil, parent, "InsetFrameTemplate")
+
+    local scrollBox = CreateFrame("Frame", nil, inset, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", 4, -4)
+    scrollBox:SetPoint("BOTTOMRIGHT", -20, 4)
+
+    local scrollBar = CreateFrame("EventFrame", nil, inset, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 4, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 4, 0)
+
+    local view = CreateScrollBoxListLinearView()
+    view:SetElementExtent(rowHeight)
+    view:SetElementInitializer(frameType, initializer)
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+
+    inset.scrollBox = scrollBox
+    return inset
+end
+
+-- A column header drawn like the Who list headers: a tab with the text on the left
+local HEADER_TEXTURE = "Interface\\FriendsFrame\\WhoFrame-ColumnTabs"
+
+function UI.CreateColumnHeader(parent, width, onClick)
+    local button = CreateFrame("Button", nil, parent)
+    button:SetSize(width, 24)
+
+    local left = button:CreateTexture(nil, "BACKGROUND")
+    left:SetTexture(HEADER_TEXTURE)
+    left:SetTexCoord(0, 0.078125, 0, 0.75)
+    left:SetSize(5, 24)
+    left:SetPoint("TOPLEFT")
+
+    local right = button:CreateTexture(nil, "BACKGROUND")
+    right:SetTexture(HEADER_TEXTURE)
+    right:SetTexCoord(0.90625, 0.96875, 0, 0.75)
+    right:SetSize(4, 24)
+    right:SetPoint("TOPRIGHT")
+
+    local middle = button:CreateTexture(nil, "BACKGROUND")
+    middle:SetTexture(HEADER_TEXTURE)
+    middle:SetTexCoord(0.078125, 0.90625, 0, 0.75)
+    middle:SetPoint("TOPLEFT", left, "TOPRIGHT")
+    middle:SetPoint("BOTTOMRIGHT", right, "BOTTOMLEFT")
+
+    button:SetNormalFontObject("GameFontHighlightSmall")
+    button:SetHighlightFontObject("GameFontHighlightSmall")
+    button:SetText(" ")
+    local text = button:GetFontString()
+    text:ClearAllPoints()
+    text:SetPoint("LEFT", 8, 0)
+    text:SetPoint("RIGHT", -8, 0)
+    text:SetJustifyH("LEFT")
+    text:SetWordWrap(false)
+
+    local highlight = button:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight")
+    highlight:SetBlendMode("ADD")
+    highlight:SetPoint("TOPLEFT", left, "TOPLEFT", -2, 5)
+    highlight:SetPoint("BOTTOMRIGHT", right, "BOTTOMRIGHT", 2, -7)
+
+    button:SetScript("OnClick", onClick)
+    return button
 end

@@ -1,7 +1,6 @@
--- Player list window: every known player in a table with sorting, filtering and pagination
+-- Player list window: every known player in a scrolling table with sorting and filtering
 local UI = Fellowship.UI
 
-local PAGE_SIZE = 25
 local ROW_HEIGHT = 16
 
 local SORT_ASC_ICON = " |TInterface\\Buttons\\Arrow-Up-Up:0|t"
@@ -85,7 +84,6 @@ local sortKey = "lastSeen"
 local sortAscending = false
 local filterText = ""
 local scoreFilter = "all"
-local currentPage = 1
 
 local function MatchesScoreFilter(score)
     score = score or 0
@@ -165,7 +163,15 @@ local ROW_HIGHLIGHT = "Interface\\QuestFrame\\UI-QuestTitleHighlight"
 -- The window is created on first use and kept, since frames cannot be destroyed
 local window
 
--- Create one font string per column across a row or header frame
+local function GetTableWidth()
+    local width = 0
+    for _, column in ipairs(columns) do
+        width = width + column.width
+    end
+    return width
+end
+
+-- Create one font string per column across a row
 local function CreateCells(parent, fontObject)
     local cells = {}
     local x = 0
@@ -182,82 +188,78 @@ local function CreateCells(parent, fontObject)
     return cells
 end
 
-local function CreatePlayerTable(parent)
-    local width = 0
-    for _, column in ipairs(columns) do
-        width = width + column.width
-    end
-
-    local tableFrame = CreateFrame("Frame", nil, parent)
-    tableFrame:SetSize(width, ROW_HEIGHT * (PAGE_SIZE + 1) + 2)
-
-    local background = tableFrame:CreateTexture(nil, "BACKGROUND")
-    background:SetAllPoints()
-    background:SetColorTexture(0, 0, 0, 0.3)
-
-    -- Header: one button per column, click to sort the whole list
-    local header = CreateFrame("Frame", nil, tableFrame)
-    header:SetPoint("TOPLEFT")
-    header:SetSize(width, ROW_HEIGHT)
-    tableFrame.headerCells = CreateCells(header, "GameFontNormalSmall")
-
-    local x = 0
-    for _, column in ipairs(columns) do
-        local button = CreateFrame("Button", nil, header)
-        button:SetPoint("TOPLEFT", header, "TOPLEFT", x, 0)
-        button:SetSize(column.width, ROW_HEIGHT)
-        button:SetHighlightTexture(ROW_HIGHLIGHT, "ADD")
-        button:SetScript("OnClick", function()
-            if sortKey == column.key then
-                sortAscending = not sortAscending
-            else
-                sortKey = column.key
-                sortAscending = column.ascending
-            end
-            currentPage = 1
-            Fellowship:RefreshPlayerList()
-        end)
-        x = x + column.width
-    end
-
-    local divider = tableFrame:CreateTexture(nil, "ARTWORK")
-    divider:SetPoint("TOPLEFT", header, "BOTTOMLEFT")
-    divider:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT")
-    divider:SetHeight(1)
-    divider:SetColorTexture(1, 0.82, 0, 0.5)
-
-    -- Rows, striped, with the full player details as a tooltip
-    tableFrame.rows = {}
-    for i = 1, PAGE_SIZE do
-        local row = CreateFrame("Button", nil, tableFrame)
-        row:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -2 - (i - 1) * ROW_HEIGHT)
-        row:SetSize(width, ROW_HEIGHT)
+-- Fill a pooled row of the scrolling list with one player
+local function InitRow(row, entry)
+    if not row.cells then
         row:SetHighlightTexture(ROW_HIGHLIGHT, "ADD")
-        if i % 2 == 0 then
-            local stripe = row:CreateTexture(nil, "BACKGROUND")
-            stripe:SetAllPoints()
-            stripe:SetColorTexture(1, 1, 1, 0.04)
-        end
+        row.stripe = row:CreateTexture(nil, "BACKGROUND")
+        row.stripe:SetAllPoints()
+        row.stripe:SetColorTexture(1, 1, 1, 0.04)
         row.cells = CreateCells(row, "GameFontHighlightSmall")
         row:SetScript("OnEnter", function(self)
-            if self.entry then
-                ShowPlayerTooltip(self, self.entry)
-            end
+            ShowPlayerTooltip(self, self.entry)
         end)
-        row:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
-        tableFrame.rows[i] = row
+        row:SetScript("OnLeave", GameTooltip_Hide)
     end
 
-    tableFrame.emptyText = tableFrame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-    tableFrame.emptyText:SetPoint("CENTER")
+    row.entry = entry
+    row.stripe:SetShown(entry.index % 2 == 0)
+    for i, column in ipairs(columns) do
+        row.cells[i]:SetText(column.display(entry))
+    end
+end
 
-    return tableFrame
+local function SetSort(column)
+    if sortKey == column.key then
+        sortAscending = not sortAscending
+    else
+        sortKey = column.key
+        sortAscending = column.ascending
+    end
+    Fellowship:RefreshPlayerList(true)
+end
+
+local function SetScoreFilter(key)
+    scoreFilter = key
+    Fellowship:RefreshPlayerList(true)
+end
+
+-- The score filter is a dropdown where the client has the menu system, otherwise a row of buttons
+local function CreateScoreFilter(frame, anchor)
+    local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    label:SetPoint("LEFT", anchor, "RIGHT", 24, 0)
+    label:SetText("Score:")
+
+    if UI.HasTemplate("WowStyle1DropdownTemplate") then
+        local dropdown = CreateFrame("DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
+        dropdown:SetWidth(150)
+        dropdown:SetPoint("LEFT", label, "RIGHT", 8, 0)
+        dropdown:SetupMenu(function(_, rootDescription)
+            for _, key in ipairs(scoreFilterOrder) do
+                rootDescription:CreateRadio(scoreFilters[key],
+                    function() return scoreFilter == key end,
+                    function() SetScoreFilter(key) end)
+            end
+        end)
+        frame.scoreDropdown = dropdown
+        return
+    end
+
+    frame.scoreButtons = {}
+    local previous = label
+    for _, key in ipairs(scoreFilterOrder) do
+        local button = UI.CreateButton(frame, scoreFilters[key], 90, function()
+            SetScoreFilter(key)
+        end)
+        button:SetPoint("LEFT", previous, "RIGHT", 6, 0)
+        frame.scoreButtons[key] = button
+        previous = button
+    end
 end
 
 local function CreateWindow()
-    local frame = UI.CreateWindow("KehetsFellowshipPlayerList", "Kehet's Fellowship - Known Players", 900, 560)
+    local tableWidth = GetTableWidth()
+    local frame = UI.CreateWindow("KehetsFellowshipPlayerList", "Kehet's Fellowship - Known Players", tableWidth + 60, 560)
     frame:SetScript("OnHide", function()
         GameTooltip:Hide()
         frame.search:ClearFocus()
@@ -265,7 +267,7 @@ local function CreateWindow()
 
     -- Filters
     local search = CreateFrame("EditBox", nil, frame, "SearchBoxTemplate")
-    search:SetPoint("TOPLEFT", 36, -36)
+    search:SetPoint("TOPLEFT", 26, -36)
     search:SetSize(300, 20)
     search:SetAutoFocus(false)
     if search.Instructions then
@@ -275,52 +277,35 @@ local function CreateWindow()
     search:HookScript("OnTextChanged", function(self)
         if self:GetText() ~= filterText then
             filterText = self:GetText()
-            currentPage = 1
-            Fellowship:RefreshPlayerList()
+            Fellowship:RefreshPlayerList(true)
         end
     end)
     frame.search = search
 
-    local scoreLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    scoreLabel:SetPoint("LEFT", search, "RIGHT", 24, 0)
-    scoreLabel:SetText("Score:")
+    CreateScoreFilter(frame, search)
 
-    frame.scoreButtons = {}
-    local previous = scoreLabel
-    for _, key in ipairs(scoreFilterOrder) do
-        local button = UI.CreateButton(frame, scoreFilters[key], 90, function()
-            scoreFilter = key
-            currentPage = 1
-            Fellowship:RefreshPlayerList()
+    -- Column headers, click to sort the whole list. They overlap by 2 pixels, as the native ones do.
+    frame.headers = {}
+    local x = 0
+    for i, column in ipairs(columns) do
+        local header = UI.CreateColumnHeader(frame, column.width + 2, function()
+            SetSort(column)
         end)
-        button.label = scoreFilters[key]
-        button:SetPoint("LEFT", previous, "RIGHT", 6, 0)
-        frame.scoreButtons[key] = button
-        previous = button
+        header:SetPoint("TOPLEFT", 18 + x, -66)
+        frame.headers[i] = header
+        x = x + column.width
     end
 
-    frame.table = CreatePlayerTable(frame)
-    frame.table:SetPoint("TOP", 0, -68)
+    -- Rows are as wide as the headers; the scroll bar sits right of them
+    frame.list = UI.CreateScrollList(frame, "Button", ROW_HEIGHT, InitRow)
+    frame.list:SetPoint("TOPLEFT", 16, -92)
+    frame.list:SetPoint("BOTTOMRIGHT", -16, 40)
 
-    -- Pagination
-    frame.pageLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    frame.pageLabel:SetPoint("BOTTOM", 0, 18)
-    frame.pageLabel:SetWidth(200)
+    frame.emptyText = frame.list:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    frame.emptyText:SetPoint("CENTER")
 
-    frame.prevButton = UI.CreateButton(frame, "< Previous", 110, function()
-        currentPage = currentPage - 1
-        Fellowship:RefreshPlayerList()
-    end)
-    frame.prevButton:SetPoint("RIGHT", frame.pageLabel, "LEFT", -4, 0)
-
-    frame.nextButton = UI.CreateButton(frame, "Next >", 110, function()
-        currentPage = currentPage + 1
-        Fellowship:RefreshPlayerList()
-    end)
-    frame.nextButton:SetPoint("LEFT", frame.pageLabel, "RIGHT", 4, 0)
-
-    frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    frame.status:SetPoint("BOTTOMLEFT", 36, 22)
+    frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    frame.status:SetPoint("BOTTOMLEFT", 24, 16)
 
     return frame
 end
@@ -335,51 +320,40 @@ function Fellowship:ShowPlayerList()
 end
 
 -- Rebuild the table from the database. Does nothing if the window is closed.
-function Fellowship:RefreshPlayerList()
+-- The list keeps its scroll position unless scrollToTop is set, as after a new sort or filter.
+function Fellowship:RefreshPlayerList(scrollToTop)
     if not window or not window:IsShown() then
         return
     end
 
     local players = self.db.factionrealm.players
     local entries = GetFilteredSortedPlayers(players)
+    for i, entry in ipairs(entries) do
+        entry.index = i
+    end
 
-    local pageCount = math.max(1, math.ceil(#entries / PAGE_SIZE))
-    currentPage = math.min(math.max(currentPage, 1), pageCount)
-
-    local st = window.table
     for i, column in ipairs(columns) do
         local text = column.title
         if column.key == sortKey then
             text = text .. (sortAscending and SORT_ASC_ICON or SORT_DESC_ICON)
         end
-        st.headerCells[i]:SetText(text)
+        window.headers[i]:SetText(text)
     end
 
-    local first = (currentPage - 1) * PAGE_SIZE
-    for i, row in ipairs(st.rows) do
-        local entry = entries[first + i]
-        row.entry = entry
-        if entry then
-            for j, column in ipairs(columns) do
-                row.cells[j]:SetText(column.display(entry))
-            end
-            row:Show()
-        else
-            row:Hide()
-        end
-    end
+    window.list.scrollBox:SetDataProvider(CreateDataProvider(entries), not scrollToTop)
 
     if #entries == 0 then
-        st.emptyText:SetText(next(players) and "No players match the filter." or "No players found in the database.")
-        st.emptyText:Show()
+        window.emptyText:SetText(next(players) and "No players match the filter." or "No players found in the database.")
+        window.emptyText:Show()
     else
-        st.emptyText:Hide()
+        window.emptyText:Hide()
     end
 
-    UI.SetChosen(window.scoreButtons, scoreFilter)
-    window.pageLabel:SetText("Page " .. currentPage .. " of " .. pageCount)
-    window.prevButton:SetEnabled(currentPage > 1)
-    window.nextButton:SetEnabled(currentPage < pageCount)
+    if window.scoreDropdown then
+        window.scoreDropdown:GenerateMenu()
+    else
+        UI.SetChosen(window.scoreButtons, scoreFilter)
+    end
 
     local total = 0
     for _ in pairs(players) do
