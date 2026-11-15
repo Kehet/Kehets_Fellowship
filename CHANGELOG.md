@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.8.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.7.0...2.8.0) (2026-11-15)
+
+
+### Features
+
+* drop the Ace3 dependency ([#39](https://github.com/Kehet/Kehets_Fellowship/issues/39)) ([0c10e9a](https://github.com/Kehet/Kehets_Fellowship/commit/0c10e9a826a3ed8d033546ce62def750db147852))
+
+
+### Bug Fixes
+
+* **options:** build the settings page on the first open ([#42](https://github.com/Kehet/Kehets_Fellowship/issues/42)) ([2901ebc](https://github.com/Kehet/Kehets_Fellowship/commit/2901ebca2fd0127ec97ef2e8946fc63c8ddb6211))
+* stop listing the player in the last group window and choose the score with a slider ([#41](https://github.com/Kehet/Kehets_Fellowship/issues/41)) ([56ddf08](https://github.com/Kehet/Kehets_Fellowship/commit/56ddf087b13cda324c103506bb955faefae1fe6b))
+
 ## [2.7.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.6.0...2.7.0) (2026-11-10)
 
 
