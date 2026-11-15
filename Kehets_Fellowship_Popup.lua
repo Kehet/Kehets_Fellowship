@@ -37,18 +37,23 @@ local function BuildRow(row)
     row.name:SetJustifyH("LEFT")
     row.name:SetWordWrap(false)
 
-    -- Score buttons from -2 to 2
-    row.scoreButtons = {}
-    for score = -2, 2 do
-        local button = UI.CreateButton(row, tostring(score), 44, function()
-            GetPlayer(row.playerName).score = score
-            Fellowship:Print("Player " .. row.playerName .. " scored: " .. score)
-            UI.SetChosen(row.scoreButtons, score)
-            Fellowship:RefreshPlayerList()
+    -- Score slider from -2 to 2. The score is saved at once; the chat line waits until the slider stops,
+    -- so a drag across several values prints one line.
+    row.score = UI.CreateScoreSlider(row, 220, function(score)
+        if row.initializing then
+            return
+        end
+        local playerName = row.playerName
+        GetPlayer(playerName).score = score
+        Fellowship:RefreshPlayerList()
+        if row.printTimer then
+            row.printTimer:Cancel()
+        end
+        row.printTimer = C_Timer.NewTimer(0.5, function()
+            Fellowship:Print("Player " .. playerName .. " scored: " .. score)
         end)
-        button:SetPoint("TOPLEFT", 160 + (score + 2) * 48, -2)
-        row.scoreButtons[score] = button
-    end
+    end)
+    row.score:SetPoint("LEFT", row, "TOPLEFT", 160, -14)
 
     local boxWidth = (CONTENT_WIDTH - 24) / 2
     row.note = UI.CreateEditBox(row, "Note:", boxWidth, function(text)
@@ -75,7 +80,9 @@ local function InitRow(row, element)
     local playerData = Fellowship.db.factionrealm.players[element.playerName] or {}
     row.playerName = element.playerName
     row.name:SetText(ColorizeNameByClass(element.playerName, playerData.class))
-    UI.SetChosen(row.scoreButtons, playerData.score)
+    row.initializing = true
+    row.score:SetValue(tonumber(playerData.score) or 0)
+    row.initializing = false
     row.note:ClearFocus()
     row.note:SetText(playerData.note or "")
     row.note:SetCursorPosition(0)

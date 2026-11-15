@@ -29,6 +29,10 @@ globals = {
 -- WoW API, FrameXML and libraries
 read_globals = {
     "UNKNOWNOBJECT",
+    "RED_FONT_COLOR",
+    "GREEN_FONT_COLOR",
+    "HIGHLIGHT_FONT_COLOR",
+    "MinimalSliderWithSteppersMixin",
     "AddonCompartmentFrame",
     "CreateDataProvider",
     "CreateScrollBoxListLinearView",
