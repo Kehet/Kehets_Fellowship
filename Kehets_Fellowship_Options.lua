@@ -113,6 +113,8 @@ end
 
 local function RegisterCanvasPage()
     page = CreateFrame("Frame")
+    -- An unparented frame starts shown, so the settings panel's first Show() would not fire OnShow
+    page:Hide()
     page.name = DISPLAY_NAME
     page.Refresh = RefreshPage
     page:SetScript("OnShow", function()
