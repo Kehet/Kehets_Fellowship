@@ -3,6 +3,7 @@ local UI = Fellowship.UI
 
 local WINDOW_WIDTH = 520
 local ROW_HEIGHT = 74
+local ROW_SPACING = 12
 local CONTENT_WIDTH = WINDOW_WIDTH - 44
 
 -- The window is created on first use and kept
@@ -86,7 +87,7 @@ end
 local function CreateWindow()
     local frame = UI.CreateWindow("KehetsFellowshipLastGroup", "Remember Players from Your Last Group", WINDOW_WIDTH, 340)
 
-    frame.list = UI.CreateScrollList(frame, "Frame", ROW_HEIGHT, InitRow)
+    frame.list = UI.CreateScrollList(frame, "Frame", ROW_HEIGHT, InitRow, ROW_SPACING)
     frame.list:SetPoint("TOPLEFT", 10, -30)
     frame.list:SetPoint("BOTTOMRIGHT", -10, 42)
 

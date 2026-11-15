@@ -113,7 +113,8 @@ end
 
 -- A recessed box with a scrolling list inside: a ScrollBox with the thin scroll bar, as the native lists have.
 -- initializer(frame, elementData) fills a pooled row of the given frame type and height.
-function UI.CreateScrollList(parent, frameType, rowHeight, initializer)
+-- spacing is the optional gap between rows.
+function UI.CreateScrollList(parent, frameType, rowHeight, initializer, spacing)
     local inset = CreateFrame("Frame", nil, parent, "InsetFrameTemplate")
 
     local scrollBox = CreateFrame("Frame", nil, inset, "WowScrollBoxList")
@@ -124,7 +125,7 @@ function UI.CreateScrollList(parent, frameType, rowHeight, initializer)
     scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 4, 0)
     scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 4, 0)
 
-    local view = CreateScrollBoxListLinearView()
+    local view = CreateScrollBoxListLinearView(0, 0, 0, 0, spacing or 0)
     view:SetElementExtent(rowHeight)
     view:SetElementInitializer(frameType, initializer)
     ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
