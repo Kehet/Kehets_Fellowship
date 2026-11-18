@@ -157,6 +157,90 @@ local function ShowPlayerTooltip(owner, entry)
     GameTooltip:Show()
 end
 
+-- Names are stored in lower case. Capitalize the name and realm for display and copying.
+local function GetDisplayName(name)
+    return (name:gsub("^%l", string.upper):gsub("[ %-]%l", string.upper))
+end
+
+local function Whisper(name)
+    if ChatFrameUtil and ChatFrameUtil.SendTell then
+        ChatFrameUtil.SendTell(name)
+    else
+        ChatFrame_SendTell(name)
+    end
+end
+
+local function Invite(name)
+    if C_PartyInfo and C_PartyInfo.InviteUnit then
+        C_PartyInfo.InviteUnit(name)
+    else
+        InviteUnit(name)
+    end
+end
+
+-- The game does not let addons write to the clipboard, so show the name selected in a text box
+StaticPopupDialogs["KEHETS_FELLOWSHIP_COPY_NAME"] = {
+    text = "Press Ctrl+C to copy the name.",
+    button1 = "Close",
+    hasEditBox = true,
+    editBoxWidth = 250,
+    OnShow = function(self, data)
+        local editBox = self.GetEditBox and self:GetEditBox() or self.editBox
+        editBox:SetText(data or self.data or "")
+        editBox:HighlightText()
+        editBox:SetFocus()
+    end,
+    EditBoxOnEnterPressed = function(self)
+        self:GetParent():Hide()
+    end,
+    EditBoxOnEscapePressed = function(self)
+        self:GetParent():Hide()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+StaticPopupDialogs["KEHETS_FELLOWSHIP_REMOVE_PLAYER"] = {
+    text = "Remove %s from the known players?\n\nThe score, note and tags are deleted.",
+    button1 = "Remove",
+    button2 = "Cancel",
+    OnAccept = function(self, data)
+        Fellowship:RemoveScore(data or self.data)
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    showAlert = true,
+    preferredIndex = 3,
+}
+
+-- Right-click menu with the actions of the guild roster menu. Clients without the menu system get no menu.
+local function ShowPlayerMenu(owner, entry)
+    if not (MenuUtil and MenuUtil.CreateContextMenu) then
+        return
+    end
+    GameTooltip:Hide()
+
+    local name = entry.name
+    local displayName = GetDisplayName(name)
+    MenuUtil.CreateContextMenu(owner, function(_, rootDescription)
+        rootDescription:CreateTitle(ColorizeNameByClass(displayName, entry.info.class))
+        rootDescription:CreateButton("Whisper", function() Whisper(name) end)
+        rootDescription:CreateButton("Invite", function() Invite(name) end)
+        rootDescription:CreateButton("Add Friend", function() C_FriendList.AddFriend(name) end)
+        rootDescription:CreateButton("Ignore", function() C_FriendList.AddIgnore(name) end)
+        rootDescription:CreateButton("Copy Character Name", function()
+            StaticPopup_Show("KEHETS_FELLOWSHIP_COPY_NAME", nil, nil, displayName)
+        end)
+        rootDescription:CreateDivider()
+        rootDescription:CreateButton("Remove from Known Players", function()
+            StaticPopup_Show("KEHETS_FELLOWSHIP_REMOVE_PLAYER", displayName, nil, name)
+        end)
+    end)
+end
+
 local CELL_PADDING = 3
 local ROW_HIGHLIGHT = "Interface\\QuestFrame\\UI-QuestTitleHighlight"
 
@@ -200,6 +284,10 @@ local function InitRow(row, entry)
             ShowPlayerTooltip(self, self.entry)
         end)
         row:SetScript("OnLeave", GameTooltip_Hide)
+        row:RegisterForClicks("RightButtonUp")
+        row:SetScript("OnClick", function(self)
+            ShowPlayerMenu(self, self.entry)
+        end)
     end
 
     row.entry = entry
