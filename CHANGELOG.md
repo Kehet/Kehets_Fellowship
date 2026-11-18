@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.8.0...2.9.0) (2026-11-18)
+
+
+### Features
+
+* **list:** add a right-click menu to the player list rows ([#44](https://github.com/Kehet/Kehets_Fellowship/issues/44)) ([bfa1790](https://github.com/Kehet/Kehets_Fellowship/commit/bfa17908004296d8eadcc26aa38153f8a9a94a8b))
+
 ## [2.8.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.7.0...2.8.0) (2026-11-15)
 
 
