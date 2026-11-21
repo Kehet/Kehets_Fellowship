@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.9.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.8.0...2.9.0) (2026-11-21)
+
+
+### Features
+
+* **list:** add a right-click menu to the player list rows ([#44](https://github.com/Kehet/Kehets_Fellowship/issues/44)) ([bfa1790](https://github.com/Kehet/Kehets_Fellowship/commit/bfa17908004296d8eadcc26aa38153f8a9a94a8b))
+* **list:** edit a player from the player list menu ([#46](https://github.com/Kehet/Kehets_Fellowship/issues/46)) ([78376ba](https://github.com/Kehet/Kehets_Fellowship/commit/78376bac40d19de31bb1dd6f197760d0a6b7591a))
+* **popup:** add preset tag buttons to the rating window ([#47](https://github.com/Kehet/Kehets_Fellowship/issues/47)) ([67a7e98](https://github.com/Kehet/Kehets_Fellowship/commit/67a7e985b4e0155fad013c048ea3e61980209558))
+
+
+### Bug Fixes
+
+* close windows with the X button during combat ([#43](https://github.com/Kehet/Kehets_Fellowship/issues/43)) ([cfaf906](https://github.com/Kehet/Kehets_Fellowship/commit/cfaf9067acf677d07ff4886e883ff57a7ba67d58))
+
 ## [2.8.0](https://github.com/Kehet/Kehets_Fellowship/compare/2.7.0...2.8.0) (2026-11-15)
 
 
