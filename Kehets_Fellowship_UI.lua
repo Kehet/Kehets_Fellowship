@@ -25,6 +25,10 @@ function UI.CreateWindow(name, title, width, height)
     if not frame.CloseButton then
         frame.CloseButton = CreateFrame("Button", nil, frame, "UIPanelCloseButtonDefaultAnchors")
     end
+    -- The native close button calls HideUIPanel, which does nothing for an addon in combat
+    frame.CloseButton:SetScript("OnClick", function()
+        frame:Hide()
+    end)
 
     table.insert(UISpecialFrames, name)
 
