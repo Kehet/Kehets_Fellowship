@@ -55,7 +55,7 @@ The player list window shows every known player in a table with their class, sco
 - Use the score menu to show only positive, neutral or negative players.
 - Use the Previous and Next buttons to move between pages of 25 players.
 - Mouse over a row to see the full note and tags.
-- Right-click a row to whisper, invite, add as friend or ignore the player, copy their name, or remove them from the list.
+- Right-click a row to edit the player's score, note and tags, or to whisper, invite, add as friend or ignore the player, copy their name, or remove them from the list.
 
 ## Commands
 
