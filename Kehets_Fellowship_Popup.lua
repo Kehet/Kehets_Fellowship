@@ -7,6 +7,12 @@ local ROW_HEIGHT = 74
 local ROW_SPACING = 12
 local CONTENT_WIDTH = WINDOW_WIDTH - 44
 
+-- Preset tag buttons, in lines of PRESETS_PER_LINE under the note and tags
+local PRESETS_PER_LINE = 5
+local PRESET_SPACING = 4
+local PRESET_LINE_HEIGHT = 24
+local PRESET_WIDTH = (CONTENT_WIDTH - 8 - (PRESETS_PER_LINE - 1) * PRESET_SPACING) / PRESETS_PER_LINE
+
 -- The window is created on first use and kept
 local window
 
@@ -24,10 +30,93 @@ local function ParseTags(text)
     return tagList
 end
 
+-- Parse the preset list, dropping repeats that differ only in case
+local function ParsePresets(text)
+    local presets = {}
+    for _, tag in ipairs(ParseTags(text)) do
+        AddTagIfMissing(presets, tag)
+    end
+    return presets
+end
+
+local function GetPresets()
+    return Fellowship.db.profile.presetTags
+end
+
+local function GetRowHeight()
+    local lines = math.ceil(#GetPresets() / PRESETS_PER_LINE)
+    return ROW_HEIGHT + lines * PRESET_LINE_HEIGHT
+end
+
+local function FindTag(tags, tag)
+    for i, existing in ipairs(tags) do
+        if string.lower(existing) == string.lower(tag) then
+            return i
+        end
+    end
+end
+
 local function GetPlayer(playerName)
     local players = Fellowship.db.factionrealm.players
     players[playerName] = players[playerName] or {}
     return players[playerName]
+end
+
+local function ShowTags(row, tags)
+    row.tags:ClearFocus()
+    row.tags:SetText(table.concat(tags, ", "))
+    row.tags:SetCursorPosition(0)
+end
+
+local function UpdatePresetButtons(row)
+    local tags = (Fellowship.db.factionrealm.players[row.playerName] or {}).tags or {}
+    for _, button in ipairs(row.presetButtons) do
+        if button:IsShown() then
+            UI.SetButtonChosen(button, FindTag(tags, button.tag) ~= nil)
+        end
+    end
+end
+
+-- Add the preset tag to the player, or remove it if they have it
+local function TogglePresetTag(row, tag)
+    local playerData = GetPlayer(row.playerName)
+    playerData.tags = playerData.tags or {}
+    local index = FindTag(playerData.tags, tag)
+    if index then
+        table.remove(playerData.tags, index)
+    else
+        table.insert(playerData.tags, tag)
+    end
+    ShowTags(row, playerData.tags)
+    UpdatePresetButtons(row)
+    Fellowship:Print("Tags for " .. row.playerName .. ": " .. table.concat(playerData.tags, ", "))
+    Fellowship:RefreshPlayerList()
+end
+
+-- Show one button for each preset, making more buttons when the row has too few
+local function LayoutPresetButtons(row)
+    local presets = GetPresets()
+    for i, tag in ipairs(presets) do
+        local button = row.presetButtons[i]
+        if not button then
+            button = UI.CreateButton(row, "", PRESET_WIDTH, function(self)
+                TogglePresetTag(row, self.tag)
+            end)
+            button:SetHeight(20)
+            local column = (i - 1) % PRESETS_PER_LINE
+            local line = math.floor((i - 1) / PRESETS_PER_LINE)
+            button:SetPoint("TOPLEFT", 4 + column * (PRESET_WIDTH + PRESET_SPACING), -ROW_HEIGHT - line * PRESET_LINE_HEIGHT)
+            button:GetFontString():SetWidth(PRESET_WIDTH - 8)
+            button:GetFontString():SetWordWrap(false)
+            row.presetButtons[i] = button
+        end
+        button.tag = tag
+        button:SetText(tag)
+        button:Show()
+    end
+    for i = #presets + 1, #row.presetButtons do
+        row.presetButtons[i]:Hide()
+    end
 end
 
 -- Build the controls of a pooled row once; InitRow fills them for one player
@@ -67,10 +156,13 @@ local function BuildRow(row)
     row.tags = UI.CreateEditBox(row, "Tags (comma-separated):", boxWidth, function(text)
         local tagList = ParseTags(text)
         GetPlayer(row.playerName).tags = tagList
+        UpdatePresetButtons(row)
         Fellowship:Print("Tags for " .. row.playerName .. ": " .. table.concat(tagList, ", "))
         Fellowship:RefreshPlayerList()
     end)
     row.tags:SetPoint("LEFT", row.note, "RIGHT", 12, 0)
+
+    row.presetButtons = {}
 end
 
 local function InitRow(row, element)
@@ -87,9 +179,50 @@ local function InitRow(row, element)
     row.note:ClearFocus()
     row.note:SetText(playerData.note or "")
     row.note:SetCursorPosition(0)
-    row.tags:ClearFocus()
-    row.tags:SetText(table.concat(playerData.tags or {}, ", "))
-    row.tags:SetCursorPosition(0)
+    ShowTags(row, playerData.tags or {})
+    LayoutPresetButtons(row)
+    UpdatePresetButtons(row)
+end
+
+local function SavePresets(dialog)
+    local editBox = dialog.GetEditBox and dialog:GetEditBox() or dialog.editBox
+    Fellowship.db.profile.presetTags = ParsePresets(editBox:GetText())
+    -- Lay the rows out again with the new buttons and row height
+    if window and window:IsShown() then
+        window.list.scrollBox:SetDataProvider(CreateDataProvider(window.elements), true)
+    end
+end
+
+StaticPopupDialogs["KEHETS_FELLOWSHIP_PRESET_TAGS"] = {
+    text = "Preset tags, comma-separated.\nThe rating window shows a button for each one.",
+    button1 = "Save",
+    button2 = "Cancel",
+    hasEditBox = true,
+    editBoxWidth = 350,
+    maxLetters = 1000,
+    OnShow = function(self)
+        local editBox = self.GetEditBox and self:GetEditBox() or self.editBox
+        editBox:SetText(table.concat(GetPresets(), ", "))
+        editBox:SetFocus()
+    end,
+    OnAccept = SavePresets,
+    EditBoxOnEnterPressed = function(self)
+        local dialog = self:GetParent()
+        SavePresets(dialog)
+        dialog:Hide()
+    end,
+    EditBoxOnEscapePressed = function(self)
+        self:GetParent():Hide()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+-- Open the dialog that edits the preset tags; the settings page has a button for it
+function Fellowship:ShowPresetTagsDialog()
+    StaticPopup_Show("KEHETS_FELLOWSHIP_PRESET_TAGS")
 end
 
 local LAST_GROUP_TITLE = "Remember Players from Your Last Group"
@@ -97,7 +230,7 @@ local LAST_GROUP_TITLE = "Remember Players from Your Last Group"
 local function CreateWindow()
     local frame = UI.CreateWindow("KehetsFellowshipLastGroup", LAST_GROUP_TITLE, WINDOW_WIDTH, 340)
 
-    frame.list = UI.CreateScrollList(frame, "Frame", ROW_HEIGHT, InitRow, ROW_SPACING)
+    frame.list = UI.CreateScrollList(frame, "Frame", GetRowHeight, InitRow, ROW_SPACING)
     frame.list:SetPoint("TOPLEFT", 10, -30)
     frame.list:SetPoint("BOTTOMRIGHT", -10, 42)
 
@@ -115,6 +248,7 @@ local function ShowPlayers(title, elements)
         window = CreateWindow()
     end
     window.titleText:SetText(title)
+    window.elements = elements
     window.list.scrollBox:SetDataProvider(CreateDataProvider(elements))
     window:Show()
     window:Raise()
