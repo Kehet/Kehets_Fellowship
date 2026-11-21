@@ -1,4 +1,5 @@
--- Popup that asks the player to rate the players of the group they just left
+-- Popup that asks the player to rate the players of the group they just left.
+-- The player list opens the same window to edit one known player.
 local UI = Fellowship.UI
 
 local WINDOW_WIDTH = 520
@@ -91,8 +92,10 @@ local function InitRow(row, element)
     row.tags:SetCursorPosition(0)
 end
 
+local LAST_GROUP_TITLE = "Remember Players from Your Last Group"
+
 local function CreateWindow()
-    local frame = UI.CreateWindow("KehetsFellowshipLastGroup", "Remember Players from Your Last Group", WINDOW_WIDTH, 340)
+    local frame = UI.CreateWindow("KehetsFellowshipLastGroup", LAST_GROUP_TITLE, WINDOW_WIDTH, 340)
 
     frame.list = UI.CreateScrollList(frame, "Frame", ROW_HEIGHT, InitRow, ROW_SPACING)
     frame.list:SetPoint("TOPLEFT", 10, -30)
@@ -106,16 +109,23 @@ local function CreateWindow()
     return frame
 end
 
+-- Show the window with one row for each of the given players
+local function ShowPlayers(title, elements)
+    if not window then
+        window = CreateWindow()
+    end
+    window.titleText:SetText(title)
+    window.list.scrollBox:SetDataProvider(CreateDataProvider(elements))
+    window:Show()
+    window:Raise()
+end
+
 -- Function to show a popup for remembering players from the previous group
 function Fellowship:ShowPreviousGroupPopup()
     -- If there are no players in the previous group, show a message
     if not previousGroupMembers or next(previousGroupMembers) == nil then
         self:Print("No previous group to show.")
         return
-    end
-
-    if not window then
-        window = CreateWindow()
     end
 
     local elements = {}
@@ -130,9 +140,12 @@ function Fellowship:ShowPreviousGroupPopup()
     end
     table.sort(elements, function(a, b) return a.playerName < b.playerName end)
 
-    window.list.scrollBox:SetDataProvider(CreateDataProvider(elements))
-    window:Show()
-    window:Raise()
+    ShowPlayers(LAST_GROUP_TITLE, elements)
+end
+
+-- Edit the score, note and tags of one known player
+function Fellowship:ShowEditPlayer(playerName)
+    ShowPlayers("Edit Player", { { playerName = playerName } })
 end
 
 -- Close the previous group popup if it is open, otherwise show it

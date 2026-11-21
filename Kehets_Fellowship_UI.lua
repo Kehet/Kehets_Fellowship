@@ -33,12 +33,12 @@ function UI.CreateWindow(name, title, width, height)
     table.insert(UISpecialFrames, name)
 
     if frame.TitleContainer and frame.TitleContainer.TitleText then
-        frame.TitleContainer.TitleText:SetText(title)
+        frame.titleText = frame.TitleContainer.TitleText
     else
-        frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        frame.title:SetPoint("TOP", 0, -5)
-        frame.title:SetText(title)
+        frame.titleText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        frame.titleText:SetPoint("TOP", 0, -5)
     end
+    frame.titleText:SetText(title)
 
     return frame
 end
