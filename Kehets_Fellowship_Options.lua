@@ -55,6 +55,13 @@ local function RegisterNativePage()
         function() return not profile.minimap.hide end,
         function(value) Fellowship:SetMinimapIconShown(value) end)
 
+    if CreateSettingsButtonInitializer then
+        layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Tags"))
+        layout:AddInitializer(CreateSettingsButtonInitializer("Preset tags", "Edit Preset Tags",
+            function() Fellowship:ShowPresetTagsDialog() end,
+            "Change the tags that the rating window shows as buttons", true))
+    end
+
     Settings.RegisterAddOnCategory(category)
 end
 
@@ -96,8 +103,17 @@ local function BuildPage()
         function(checked) Fellowship:SetMinimapIconShown(checked) end)
     page.minimap:SetPoint("TOPLEFT", 12, -182)
 
+    page.tagsHeader = page:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    page.tagsHeader:SetPoint("TOPLEFT", 16, -224)
+    page.tagsHeader:SetText("Tags")
+
+    page.presetTags = UI.CreateButton(page, "Edit Preset Tags", 140, function()
+        Fellowship:ShowPresetTagsDialog()
+    end)
+    page.presetTags:SetPoint("TOPLEFT", 16, -244)
+
     page.messages = page:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    page.messages:SetPoint("TOPLEFT", 16, -224)
+    page.messages:SetPoint("TOPLEFT", 16, -286)
     page.messages:SetText("The chat messages are set on the Messages page under this one.")
 end
 

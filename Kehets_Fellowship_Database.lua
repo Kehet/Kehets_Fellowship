@@ -82,6 +82,10 @@ function Fellowship.LoadDatabase(saved)
     profileKeys[charKey] = profileName
     local profile = GetTable(profiles, profileName)
     CopyDefaults(profile, defaultProfile)
+    -- Not in defaultProfile: CopyDefaults would put back the presets the player removed
+    if type(profile.presetTags) ~= "table" then
+        profile.presetTags = { "Friendly", "Helpful", "Skilled", "New player", "AFK", "Leaver", "Rude", "Ninja looter" }
+    end
 
     return {
         factionrealm = realm,

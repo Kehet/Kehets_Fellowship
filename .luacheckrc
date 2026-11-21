@@ -36,6 +36,7 @@ read_globals = {
     "AddonCompartmentFrame",
     "CreateDataProvider",
     "CreateScrollBoxListLinearView",
+    "CreateSettingsButtonInitializer",
     "CreateSettingsListSectionHeaderInitializer",
     "ScrollUtil",
     "C_GameRules",

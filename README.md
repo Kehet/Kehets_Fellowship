@@ -15,6 +15,7 @@ When you leave a group, a window opens with every player from that group. For ea
 - Give a score from -2 to 2. A positive score marks them as a good player.
 - Write a note and press Enter to save it.
 - Add comma-separated tags and press Enter to save them.
+- Click a preset tag button to add that tag, or click it again to remove it. A lit button means the player has the tag. Change the list of presets with Edit Preset Tags on the settings page.
 
 The window adds the role each player had in the group (Tank, Healer or DPS) to their tags, unless they already have that tag.
 
@@ -38,6 +39,7 @@ Open the settings page from the game menu under Options, AddOns, Kehet's Fellows
 - Play the sound for guild members.
 - Play the sound for friends.
 - Show the minimap button.
+- Edit Preset Tags: change the tags that the rating window shows as buttons.
 
 The Messages page under it has the login message, the message for a known player who joins and the vote kick message. Each message has these settings:
 
